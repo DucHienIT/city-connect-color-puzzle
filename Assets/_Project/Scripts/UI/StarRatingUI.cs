@@ -10,19 +10,28 @@ namespace TinyTownRoads
         public RectTransform Root { get; }
 
         readonly Image[] stars = new Image[3];
+        readonly bool themed;
 
         static readonly Color Gold = new Color(1f, 0.8f, 0.18f);
         static readonly Color Gray = new Color(0.27f, 0.30f, 0.40f);
+        static readonly Color DimStar = new Color(0.34f, 0.32f, 0.30f, 0.85f);
+
+        Color LitColor => themed ? Color.white : Gold;
+        Color UnlitColor => themed ? DimStar : Gray;
 
         public StarRatingUI(Transform parent, float starSize, float spacing)
         {
+            var theme = UIFactory.Theme;
+            themed = theme != null && theme.star != null;
+
             Root = UIFactory.CreateRect(parent, "Stars");
             for (int i = 0; i < 3; i++)
             {
                 var rt = UIFactory.CreateRect(Root, $"Star_{i}");
                 var img = rt.gameObject.AddComponent<Image>();
-                img.sprite = SpriteFactory.Star;
-                img.color = Gray;
+                img.sprite = themed ? theme.star : SpriteFactory.Star;
+                img.preserveAspect = true;
+                img.color = UnlitColor;
                 img.raycastTarget = false;
                 float lift = i == 1 ? starSize * 0.22f : 0f;
                 float scale = i == 1 ? 1.2f : 1f;
@@ -39,7 +48,7 @@ namespace TinyTownRoads
                 var img = stars[i];
                 bool lit = i < count;
                 img.transform.DOKill();
-                img.color = lit ? Gold : Gray;
+                img.color = lit ? LitColor : UnlitColor;
                 img.transform.localScale = Vector3.one;
                 if (lit && animate)
                 {

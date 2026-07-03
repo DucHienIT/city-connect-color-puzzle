@@ -6,17 +6,36 @@ namespace TinyTownRoads
 {
     /// <summary>
     /// Helpers for building the whole UI from code (no prefabs): canvas, panels,
-    /// legacy-Text labels and buttons, plus the shared color scheme.
+    /// legacy-Text labels and buttons. Visuals come from the GUI Pro-CasualGame kit
+    /// via the UITheme asset in Resources/UI (LilitaOne font, sliced button/panel
+    /// sprites, picto icons); everything degrades to the flat SpriteFactory look
+    /// when the theme or a sprite is missing. Deliberately not TMP.
     /// </summary>
     public static class UIFactory
     {
-        static Font font;
+        static UITheme theme;
+        static bool themeSearched;
+        public static UITheme Theme
+        {
+            get
+            {
+                if (!themeSearched)
+                {
+                    themeSearched = true;
+                    theme = Resources.Load<UITheme>("UI/UITheme");
+                }
+                return theme;
+            }
+        }
+
+        static Font fallbackFont;
         public static Font Font
         {
             get
             {
-                if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                return font;
+                if (Theme != null && Theme.font != null) return Theme.font;
+                if (fallbackFont == null) fallbackFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                return fallbackFont;
             }
         }
 
@@ -75,6 +94,7 @@ namespace TinyTownRoads
             rt.sizeDelta = size;
         }
 
+        /// <summary>Flat procedural image (dim layers, theme-less fallback panels).</summary>
         public static Image CreateImage(Transform parent, string name, Color color, bool rounded = true)
         {
             var rt = CreateRect(parent, name);
@@ -85,39 +105,98 @@ namespace TinyTownRoads
             return img;
         }
 
+        /// <summary>Kit sprite image; 9-sliced automatically when the sprite has a border.</summary>
+        public static Image CreateSpriteImage(Transform parent, string name, Sprite sprite, Color? tint = null)
+        {
+            var rt = CreateRect(parent, name);
+            var img = rt.gameObject.AddComponent<Image>();
+            img.sprite = sprite;
+            img.type = sprite != null && sprite.border != Vector4.zero ? Image.Type.Sliced : Image.Type.Simple;
+            img.color = tint ?? Color.white;
+            return img;
+        }
+
+        /// <summary>Non-interactive icon image keeping its aspect ratio.</summary>
+        public static Image CreateIcon(Transform parent, string name, Sprite sprite, Vector2 size, Color? tint = null)
+        {
+            var img = CreateSpriteImage(parent, name, sprite, tint);
+            img.type = Image.Type.Simple;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+            ((RectTransform)img.transform).sizeDelta = size;
+            return img;
+        }
+
         public static Text CreateText(Transform parent, string name, string content, int size,
-            Color color, FontStyle style = FontStyle.Bold)
+            Color color, FontStyle style = FontStyle.Bold, bool shadow = true)
         {
             var rt = CreateRect(parent, name);
             var text = rt.gameObject.AddComponent<Text>();
             text.font = Font;
             text.text = content;
             text.fontSize = size;
-            text.fontStyle = style;
+            // LilitaOne only ships a regular face; bold would be faux-rendered.
+            text.fontStyle = Theme != null && Theme.font != null ? FontStyle.Normal : style;
             text.color = color;
             text.alignment = TextAnchor.MiddleCenter;
             text.horizontalOverflow = HorizontalWrapMode.Overflow;
             text.verticalOverflow = VerticalWrapMode.Overflow;
             text.raycastTarget = false;
+            if (shadow && Theme != null)
+            {
+                var sh = rt.gameObject.AddComponent<Shadow>();
+                sh.effectColor = new Color(0f, 0f, 0f, 0.35f);
+                sh.effectDistance = new Vector2(0f, -3f);
+            }
             return text;
         }
 
         public static Button CreateButton(Transform parent, string name, string label, Vector2 size,
-            Action onClick, Color? bg = null, int fontSize = 44)
+            Action onClick, Sprite sprite = null, int fontSize = 44)
         {
-            var img = CreateImage(parent, name, bg ?? ButtonColor);
+            if (sprite == null && Theme != null) sprite = Theme.buttonBlue;
+            var img = sprite != null
+                ? CreateSpriteImage(parent, name, sprite)
+                : CreateImage(parent, name, ButtonColor);
             var rt = (RectTransform)img.transform;
             rt.sizeDelta = size;
             var button = img.gameObject.AddComponent<Button>();
             button.targetGraphic = img;
+            button.transition = Selectable.Transition.ColorTint;
             button.onClick.AddListener(() =>
             {
                 AudioManager.Instance?.PlayClick();
                 onClick?.Invoke();
             });
-            var text = CreateText(img.transform, "Label", label, fontSize, TextColor);
+            var text = CreateText(img.transform, "Label", label, fontSize, Color.white);
             Stretch((RectTransform)text.transform);
             return button;
+        }
+
+        /// <summary>Square button showing only an icon (bottom action bar and the like).</summary>
+        public static Button CreateIconButton(Transform parent, string name, Sprite bg, Sprite icon,
+            float size, Action onClick)
+        {
+            var button = CreateButton(parent, name, "", new Vector2(size, size), onClick, bg);
+            if (icon != null)
+            {
+                var img = CreateIcon(button.transform, "Icon", icon, Vector2.one * (size * 0.54f));
+                Place((RectTransform)img.transform, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.one * (size * 0.54f));
+            }
+            return button;
+        }
+
+        /// <summary>Adds a leading icon to a labeled button and nudges the label right.</summary>
+        public static void AddButtonIcon(Button button, Sprite icon, float size)
+        {
+            if (icon == null) return;
+            var img = CreateIcon(button.transform, "Icon", icon, Vector2.one * size);
+            var rt = (RectTransform)img.transform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = new Vector2(size * 0.85f + 14f, 4f);
+            var label = (RectTransform)ButtonLabel(button).transform;
+            label.offsetMin = new Vector2(size * 0.9f, 0f);
         }
 
         /// <summary>Finds the Text child created by CreateButton, for dynamic labels.</summary>

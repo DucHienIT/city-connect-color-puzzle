@@ -38,8 +38,11 @@ namespace TinyTownRoads
             settings = new SettingsMenu(root, this);
 
             var toastRt = UIFactory.CreateRect(root, "Toast");
-            UIFactory.Place(toastRt, new Vector2(0.5f, 0.22f), Vector2.zero, new Vector2(900, 90));
-            var bg = UIFactory.CreateImage(toastRt, "Bg", new Color(0f, 0f, 0f, 0.75f));
+            UIFactory.Place(toastRt, new Vector2(0.5f, 0.22f), Vector2.zero, new Vector2(900, 96));
+            var theme = UIFactory.Theme;
+            var bg = theme != null && theme.label != null
+                ? UIFactory.CreateSpriteImage(toastRt, "Bg", theme.label, new Color(0.16f, 0.18f, 0.26f, 0.95f))
+                : UIFactory.CreateImage(toastRt, "Bg", new Color(0f, 0f, 0f, 0.75f));
             UIFactory.Stretch((RectTransform)bg.transform);
             toastText = UIFactory.CreateText(toastRt, "Text", "", 40, UIFactory.TextColor, FontStyle.Normal);
             UIFactory.Stretch((RectTransform)toastText.transform);

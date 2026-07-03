@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab4e931c8d2f63a7b8f9e0d1c56b0408, type: 3}
+  m_Name: UITheme
+  m_EditorClassIdentifier:
+  font: {fileID: 12800000, guid: c16eb7d7c3953489db00312b8b09df4b, type: 3}
+  buttonGreen: {fileID: 21300000, guid: cb37917483ee24fea8fab306393441e5, type: 3}
+  buttonBlue: {fileID: 21300000, guid: 6bbcba4e267be464998897741b81d508, type: 3}
+  buttonYellow: {fileID: 21300000, guid: 804461bef59b141dba258fc997c8ca15, type: 3}
+  buttonOrange: {fileID: 21300000, guid: 2bc701b63b63f40e0893a9fabeaa0a78, type: 3}
+  buttonRed: {fileID: 21300000, guid: 681db73f19fb24efe843aad713eccb43, type: 3}
+  buttonGray: {fileID: 21300000, guid: 23d2f9d15f15a43c5bf2c57de1a27879, type: 3}
+  squareBlue: {fileID: 21300000, guid: 0036322b5b88b4794b6e86458a3c81ce, type: 3}
+  squareYellow: {fileID: 21300000, guid: 77f2fa5c779c34ab9ad50e39ebe0bacf, type: 3}
+  cellFrame: {fileID: 21300000, guid: 1c72bf871f2614c4a8e129267b425912, type: 3}
+  panel: {fileID: 21300000, guid: e792b7a6f9b844e14b97fcb3514851e0, type: 3}
+  titleFlag: {fileID: 21300000, guid: 9582955bb9cfe4598a1fc0bc68f65ff8, type: 3}
+  titleFlagAlt: {fileID: 21300000, guid: 6731b0963109040fcb82ad50cbbef63c, type: 3}
+  label: {fileID: 21300000, guid: de4b2777d088c49dea1bbd2c0f5d295d, type: 3}
+  iconHome: {fileID: 21300000, guid: 77039943e59a543f296a47eda2f38fa9, type: 3}
+  iconRefresh: {fileID: 21300000, guid: a8752cfacfe744f3f86939c5b9573a3d, type: 3}
+  iconUndo: {fileID: 21300000, guid: cd1da1566f0d846209d4c58230357a58, type: 3}
+  iconBulb: {fileID: 21300000, guid: be2ad1478e1934aaeaf8647226819ac2, type: 3}
+  iconSetting: {fileID: 21300000, guid: 2f62c4c76f3ba43bd9997518ea4ae644, type: 3}
+  iconPlay: {fileID: 21300000, guid: 81642f823666e4c7ca00670b697f503f, type: 3}
+  iconLock: {fileID: 21300000, guid: 37f96e03563fe46159e2101ce9312f7b, type: 3}
+  iconSoundOn: {fileID: 21300000, guid: f0c5a27e83b9744da98d350a200ff06f, type: 3}
+  iconSoundOff: {fileID: 21300000, guid: 0dc6a38b1e62c426eb1a8ceaea787d4a, type: 3}
+  iconMusicOn: {fileID: 21300000, guid: 186191ea380174ca9b4fe72856cda52c, type: 3}
+  iconMusicOff: {fileID: 21300000, guid: 9b2dd3f7f521c49b5b5b7579ab1dd65b, type: 3}
+  iconClose: {fileID: 21300000, guid: 0dc6643ddb3934127b12402c7fd7bcf1, type: 3}
+  star: {fileID: 21300000, guid: 341d24db5c13444afb87c02c09b2bfa6, type: 3}
