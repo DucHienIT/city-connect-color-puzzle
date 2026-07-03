@@ -1,0 +1,86 @@
+{
+  "levelId": 9,
+  "gridWidth": 7,
+  "gridHeight": 7,
+  "requireFullCoverage": true,
+  "pairs": [
+    {
+      "color": "red",
+      "start": {
+        "x": 6,
+        "y": 6
+      },
+      "end": {
+        "x": 2,
+        "y": 2
+      }
+    },
+    {
+      "color": "blue",
+      "start": {
+        "x": 3,
+        "y": 6
+      },
+      "end": {
+        "x": 2,
+        "y": 3
+      }
+    },
+    {
+      "color": "yellow",
+      "start": {
+        "x": 0,
+        "y": 5
+      },
+      "end": {
+        "x": 2,
+        "y": 6
+      }
+    },
+    {
+      "color": "green",
+      "start": {
+        "x": 2,
+        "y": 4
+      },
+      "end": {
+        "x": 3,
+        "y": 3
+      }
+    },
+    {
+      "color": "orange",
+      "start": {
+        "x": 0,
+        "y": 2
+      },
+      "end": {
+        "x": 3,
+        "y": 1
+      }
+    },
+    {
+      "color": "purple",
+      "start": {
+        "x": 3,
+        "y": 0
+      },
+      "end": {
+        "x": 6,
+        "y": 5
+      }
+    },
+    {
+      "color": "cyan",
+      "start": {
+        "x": 5,
+        "y": 0
+      },
+      "end": {
+        "x": 6,
+        "y": 4
+      }
+    }
+  ],
+  "obstacles": []
+}

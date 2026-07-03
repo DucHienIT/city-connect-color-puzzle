@@ -1,0 +1,150 @@
+{
+  "levelId": 23,
+  "gridWidth": 9,
+  "gridHeight": 9,
+  "requireFullCoverage": true,
+  "pairs": [
+    {
+      "color": "red",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 4,
+        "y": 2
+      }
+    },
+    {
+      "color": "blue",
+      "start": {
+        "x": 2,
+        "y": 0
+      },
+      "end": {
+        "x": 6,
+        "y": 2
+      }
+    },
+    {
+      "color": "yellow",
+      "start": {
+        "x": 4,
+        "y": 0
+      },
+      "end": {
+        "x": 7,
+        "y": 3
+      }
+    },
+    {
+      "color": "green",
+      "start": {
+        "x": 8,
+        "y": 0
+      },
+      "end": {
+        "x": 8,
+        "y": 6
+      }
+    },
+    {
+      "color": "orange",
+      "start": {
+        "x": 8,
+        "y": 7
+      },
+      "end": {
+        "x": 6,
+        "y": 5
+      }
+    },
+    {
+      "color": "purple",
+      "start": {
+        "x": 8,
+        "y": 8
+      },
+      "end": {
+        "x": 5,
+        "y": 7
+      }
+    },
+    {
+      "color": "cyan",
+      "start": {
+        "x": 6,
+        "y": 3
+      },
+      "end": {
+        "x": 4,
+        "y": 7
+      }
+    },
+    {
+      "color": "pink",
+      "start": {
+        "x": 5,
+        "y": 8
+      },
+      "end": {
+        "x": 0,
+        "y": 7
+      }
+    },
+    {
+      "color": "brown",
+      "start": {
+        "x": 0,
+        "y": 6
+      },
+      "end": {
+        "x": 2,
+        "y": 4
+      }
+    },
+    {
+      "color": "lime",
+      "start": {
+        "x": 4,
+        "y": 4
+      },
+      "end": {
+        "x": 0,
+        "y": 2
+      }
+    },
+    {
+      "color": "teal",
+      "start": {
+        "x": 1,
+        "y": 4
+      },
+      "end": {
+        "x": 0,
+        "y": 3
+      }
+    },
+    {
+      "color": "indigo",
+      "start": {
+        "x": 3,
+        "y": 6
+      },
+      "end": {
+        "x": 2,
+        "y": 6
+      }
+    }
+  ],
+  "obstacles": [
+    {
+      "x": 6,
+      "y": 1
+    },
+    {
+      "x": 1,
+      "y": 0
+    }
+  ]
+}
