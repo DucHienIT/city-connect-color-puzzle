@@ -49,7 +49,10 @@ namespace TinyTownRoads
             preDragSnapshot = paths.Snapshot();
             dragStartVersion = paths.Version;
             if (paths.BeginDrag(cell, out activeColor, out activeHouse))
+            {
                 AudioManager.Instance?.PlayPick();
+                view.PulseCity(activeColor); // show which city this house belongs to
+            }
         }
 
         void OnPressMoved(Vector2 screenPos)

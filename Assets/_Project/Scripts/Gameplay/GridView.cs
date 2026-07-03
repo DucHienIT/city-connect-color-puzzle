@@ -91,5 +91,11 @@ namespace TinyTownRoads
         {
             foreach (var node in nodes[color]) node.Pulse();
         }
+
+        /// <summary>Pulses only the city building — used to point out the drag target.</summary>
+        public void PulseCity(int color)
+        {
+            nodes[color][0].Pulse(); // the city is created first for every color
+        }
     }
 }

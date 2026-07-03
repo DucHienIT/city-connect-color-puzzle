@@ -4,13 +4,21 @@ using UnityEngine;
 namespace TinyTownRoads
 {
     /// <summary>
-    /// The little vehicle riding each road: parked at the drawing head while the player
-    /// drags, and driving the whole route once its pair connects. Body is tinted with
-    /// the path color; windows/roof/wheels are baked into the details mesh.
+    /// The little vehicle riding each road: parked at the drawing head while the
+    /// player drags, and — once its branch connects — driving house → city on a
+    /// loop forever (short pause at the city, then back at the house), keeping
+    /// finished roads alive. Body is tinted with the color; windows/roof/wheels
+    /// are baked into the details mesh.
     /// </summary>
     public class CarView : MonoBehaviour
     {
+        const float SecondsPerCell = 0.18f;
+        const float CityPause = 0.5f;
+
         Tween drive;
+
+        /// <summary>True while the looping drive tween is alive.</summary>
+        public bool IsDriving => drive != null && drive.IsActive();
 
         public static CarView Create(Transform parent, Color color)
         {
@@ -33,7 +41,7 @@ namespace TinyTownRoads
                 transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
         }
 
-        /// <summary>Drive the full route once, then vanish (delivered into the city).</summary>
+        /// <summary>Drive the route on an endless loop: house → city, brief stop, repeat.</summary>
         public void Drive(Vector3[] waypoints)
         {
             if (waypoints == null || waypoints.Length < 2) return;
@@ -41,10 +49,12 @@ namespace TinyTownRoads
             gameObject.SetActive(true);
             transform.position = waypoints[0];
             transform.rotation = Quaternion.LookRotation(waypoints[1] - waypoints[0], Vector3.up);
-            drive = transform.DOPath(waypoints, 0.12f * waypoints.Length, PathType.Linear)
-                .SetLookAt(0.02f)
-                .SetEase(Ease.InOutSine)
-                .OnComplete(() => gameObject.SetActive(false));
+            drive = DOTween.Sequence()
+                .Append(transform.DOPath(waypoints, SecondsPerCell * waypoints.Length, PathType.Linear)
+                    .SetLookAt(0.02f)
+                    .SetEase(Ease.Linear))
+                .AppendInterval(CityPause)
+                .SetLoops(-1, LoopType.Restart);
         }
 
         public void Hide()

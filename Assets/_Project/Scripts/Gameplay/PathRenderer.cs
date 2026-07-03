@@ -7,8 +7,8 @@ namespace TinyTownRoads
     /// Renders every color's road branches as pooled 3D pieces — asphalt segments
     /// with round joints and white center dashes — rebuilding a color's visuals
     /// whenever its roads change. Each house has its own car: parked at the drawing
-    /// head while dragging, and driving into the city (then disappearing) when its
-    /// branch connects. City buildings pulse when their whole demand is met.
+    /// head while dragging, and looping house → city forever once its branch
+    /// connects. City buildings pulse when their whole demand is met.
     /// </summary>
     public class PathRenderer : MonoBehaviour
     {
@@ -89,7 +89,8 @@ namespace TinyTownRoads
 
         void Rebuild(int color)
         {
-            var roadColor = Color.Lerp(AsphaltColor, grid.DisplayColor(color), 0.4f);
+            // Strong color share so roads of nearby hues stay tellable apart.
+            var roadColor = Color.Lerp(AsphaltColor, grid.DisplayColor(color), 0.55f);
             int branchCount = paths.BranchCount(color);
 
             // Joints: one per covered cell, deduped (branches share the city cell).
@@ -160,11 +161,13 @@ namespace TinyTownRoads
             if (complete)
             {
                 if (!branchWasComplete[color][house])
-                {
                     AudioManager.Instance?.PlayPairComplete();
+                // Connected roads stay alive: the car loops the route forever.
+                if (!branchWasComplete[color][house] || !car.IsDriving)
+                {
                     var waypoints = new Vector3[branch.Count];
                     for (int i = 0; i < branch.Count; i++) waypoints[i] = RoadPoint(branch[i]);
-                    car.Drive(waypoints); // drives to the city and disappears inside
+                    car.Drive(waypoints);
                 }
             }
             else if (branch.Count >= 2)

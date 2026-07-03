@@ -5,8 +5,9 @@ using UnityEngine;
 namespace TinyTownRoads.EditorTools
 {
     /// <summary>
-    /// Editor tool for generating solver-validated levels into Resources/Levels,
-    /// and for re-validating everything already there.
+    /// Editor tool for generating solver-validated LevelAsset files into
+    /// Resources/Levels, and for re-validating everything already there.
+    /// Existing assets with the same name are updated in place (GUIDs survive).
     /// </summary>
     public class LevelGeneratorWindow : EditorWindow
     {
@@ -64,25 +65,43 @@ namespace TinyTownRoads.EditorTools
                     continue;
                 }
                 level.levelId = startId + i;
-                File.WriteAllText(Path.Combine(outputFolder, $"level_{level.levelId:000}.json"), level.ToJson());
+                SaveLevelAsset(level);
                 written++;
             }
             EditorUtility.ClearProgressBar();
-            AssetDatabase.Refresh();
+            AssetDatabase.SaveAssets();
             Debug.Log($"Level generator: wrote {written}/{count} levels to {outputFolder}");
+        }
+
+        void SaveLevelAsset(LevelData level)
+        {
+            string path = Path.Combine(outputFolder, $"level_{level.levelId:000}.asset").Replace('\\', '/');
+            var existing = AssetDatabase.LoadAssetAtPath<LevelAsset>(path);
+            if (existing != null)
+            {
+                existing.data = level;
+                EditorUtility.SetDirty(existing);
+            }
+            else
+            {
+                var asset = ScriptableObject.CreateInstance<LevelAsset>();
+                asset.data = level;
+                AssetDatabase.CreateAsset(asset, path);
+            }
         }
 
         void ValidateAll()
         {
-            var files = Directory.GetFiles(outputFolder, "*.json");
+            var guids = AssetDatabase.FindAssets("t:LevelAsset", new[] { outputFolder });
             int ok = 0;
-            foreach (var file in files)
+            foreach (var guid in guids)
             {
-                var level = LevelData.FromJson(File.ReadAllText(file));
-                if (Solver.Solve(level) != null) { ok++; continue; }
-                Debug.LogWarning($"{Path.GetFileName(file)} (level {level.levelId}): NO solution found");
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                var asset = AssetDatabase.LoadAssetAtPath<LevelAsset>(path);
+                if (Solver.Solve(asset.data) != null) { ok++; continue; }
+                Debug.LogWarning($"{Path.GetFileName(path)} (level {asset.data.levelId}): NO solution found");
             }
-            Debug.Log($"Validation: {ok}/{files.Length} levels are solvable.");
+            Debug.Log($"Validation: {ok}/{guids.Length} levels are solvable.");
         }
     }
 }

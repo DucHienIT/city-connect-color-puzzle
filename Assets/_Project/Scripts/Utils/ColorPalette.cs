@@ -16,20 +16,23 @@ namespace TinyTownRoads
             "cyan", "pink", "brown", "lime", "teal", "indigo"
         };
 
+        // Tuned for small 3D buildings viewed from above: neighbors in this list are
+        // deliberately far apart in hue/value so red/orange/pink never read as the
+        // same color once roofs are darkened and roads are tinted.
         static readonly Dictionary<string, Color> Colors = new Dictionary<string, Color>
         {
-            { "red",    FromHex(0xE5484D) },
-            { "blue",   FromHex(0x3E63DD) },
-            { "yellow", FromHex(0xF5C518) },
-            { "green",  FromHex(0x46A758) },
-            { "orange", FromHex(0xF76B15) },
-            { "purple", FromHex(0x8E4EC6) },
-            { "cyan",   FromHex(0x00A2C7) },
-            { "pink",   FromHex(0xE64BA6) },
-            { "brown",  FromHex(0xAD7F58) },
-            { "lime",   FromHex(0x99D52A) },
-            { "teal",   FromHex(0x12A594) },
-            { "indigo", FromHex(0x6E56CF) },
+            { "red",    FromHex(0xE23333) },
+            { "blue",   FromHex(0x2F6BFF) },
+            { "yellow", FromHex(0xFFD400) },
+            { "green",  FromHex(0x2FA84F) },
+            { "orange", FromHex(0xFF8A00) },
+            { "purple", FromHex(0x9046E0) },
+            { "cyan",   FromHex(0x00C2E0) },
+            { "pink",   FromHex(0xFF64B8) },
+            { "brown",  FromHex(0x8A5A3B) },
+            { "lime",   FromHex(0xA8D521) },
+            { "teal",   FromHex(0x0E9888) },
+            { "indigo", FromHex(0x4A3FB5) },
         };
 
         public static Color Get(string name)

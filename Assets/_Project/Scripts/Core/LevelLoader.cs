@@ -5,7 +5,8 @@ using UnityEngine;
 namespace TinyTownRoads
 {
     /// <summary>
-    /// Loads every level JSON from Resources/Levels once and serves them sorted by levelId.
+    /// Loads every LevelAsset from Resources/Levels once and serves the wrapped
+    /// LevelData sorted by levelId.
     /// </summary>
     public class LevelLoader
     {
@@ -15,9 +16,9 @@ namespace TinyTownRoads
 
         public LevelLoader()
         {
-            levels = Resources.LoadAll<TextAsset>(ResourcesFolder)
-                .Select(asset => LevelData.FromJson(asset.text))
-                .Where(level => level.groups.Count > 0)
+            levels = Resources.LoadAll<LevelAsset>(ResourcesFolder)
+                .Select(asset => asset.data)
+                .Where(level => level != null && level.groups.Count > 0)
                 .OrderBy(level => level.levelId)
                 .ToList();
 

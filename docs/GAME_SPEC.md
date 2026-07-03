@@ -44,23 +44,23 @@
 
 ## 3. Cấu trúc dữ liệu màn chơi (Level Data)
 
-Dùng file JSON hoặc ScriptableObject để định nghĩa từng màn:
+Mỗi màn là một **ScriptableObject** (`LevelAsset`, file `.asset` trong `Resources/Levels`) bọc quanh class dữ liệu thuần `LevelData` — nhờ đó chỉnh level trực tiếp trong Inspector, còn core logic (solver/generator/test) không phụ thuộc UnityEngine:
 
-```json
-{
-  "levelId": 1,
-  "gridWidth": 7,
-  "gridHeight": 7,
-  "groups": [
-    { "color": "red",    "city": {"x":4,"y":2}, "houses": [ {"x":0,"y":0}, {"x":2,"y":4} ] },
-    { "color": "blue",   "city": {"x":1,"y":5}, "houses": [ {"x":6,"y":6} ] },
-    { "color": "yellow", "city": {"x":2,"y":1}, "houses": [ {"x":5,"y":0}, {"x":0,"y":3}, {"x":6,"y":2} ] }
-  ],
-  "obstacles": [ {"x":3,"y":3} ]
+```csharp
+public class LevelAsset : ScriptableObject { public LevelData data; }
+
+[Serializable] public class LevelData {
+  public int levelId, gridWidth, gridHeight;
+  public List<ColorGroup> groups;     // mỗi màu: city + houses[]
+  public List<CellCoord> obstacles;
+}
+[Serializable] public class ColorGroup {
+  public string color;                // tên màu trong ColorPalette
+  public CellCoord city;
+  public List<CellCoord> houses;      // demand = houses.Count (pin trên nóc), tối đa 4
 }
 ```
 
-- `groups`: mỗi màu = 1 `city` + danh sách `houses` (số nhà = demand hiển thị bằng pin trên nóc thành phố, tối đa 4).
 - `obstacles`: các ô bị chặn, không thể đi qua (tùy chọn, tăng độ khó).
 - Nên tổ chức các level theo `LevelPack` (ví dụ mỗi pack 20-50 màn, theo chủ đề thành phố khác nhau: phố cổ, khu công nghiệp, ven biển...).
 
@@ -126,7 +126,7 @@ Assets/
       UI/
     Audio/
     Resources/
-      Levels/ (JSON files hoặc TextAsset)
+      Levels/ (LevelAsset .asset files)
 ```
 
 ### Công nghệ/gói đề xuất
@@ -152,7 +152,7 @@ Assets/
 ## 7. Checklist triển khai (đưa cho Claude Code làm theo thứ tự)
 
 - [x] 1. Khởi tạo project Unity 2D (URP), cấu trúc thư mục như mục 5.
-- [x] 2. Viết `GridModel`, `LevelData`, `LevelLoader` — load được 1 level mẫu từ JSON.
+- [x] 2. Viết `GridModel`, `LevelData`, `LevelLoader` — load được 1 level mẫu (LevelAsset ScriptableObject).
 - [x] 3. Viết `GridView`, `NodeView` — render lưới và node theo dữ liệu level.
 - [x] 4. Viết `InputController` + `PathDrawer` — cho phép kéo để vẽ đường nối giữa 2 node cùng màu, tuân thủ luật ở mục 2.2.
 - [x] 5. Viết `WinChecker` — phát hiện khi hoàn thành màn (tất cả cặp nối + phủ kín nếu yêu cầu).
@@ -161,7 +161,7 @@ Assets/
 - [x] 8. Viết `HintController` dùng Solver để gợi ý bước tiếp theo.
 - [x] 9. Viết `LevelSelectUI` hiển thị danh sách level + số sao đã đạt (dùng `SaveSystem`).
 - [x] 10. Viết `SaveSystem` lưu tiến trình (PlayerPrefs hoặc JSON file trong `Application.persistentDataPath`).
-- [x] 11. Tạo tối thiểu 20 level mẫu (JSON) tăng dần độ khó (5x5 → 9x9), dùng `LevelGenerator`/tự tay tạo rồi validate bằng `Solver`.
+- [x] 11. Tạo tối thiểu 20 level mẫu (LevelAsset) tăng dần độ khó (5x5 → 9x9), dùng `LevelGenerator`/tự tay tạo rồi validate bằng `Solver`.
 - [x] 12. Thêm âm thanh cơ bản (SFX vẽ đường, SFX thắng màn, nhạc nền) qua `AudioManager`.
 - [x] 13. Polish UI/UX: animation khi hoàn thành đường, hiệu ứng sao, theme màu thành phố (nhà cao tầng, công viên...). *(bản đầu: node "tòa nhà" procedural, DOTween pulse/star pop; art thật có thể thay sau)*
 - [ ] 14. (Tùy chọn) Tích hợp quảng cáo thưởng (rewarded ads) để đổi thêm Hint.

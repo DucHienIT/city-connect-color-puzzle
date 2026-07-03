@@ -72,7 +72,7 @@ namespace TinyTownRoads
 
             var roof = MeshFactory.CreatePart(t, "Roof",
                 MeshFactory.RoundedBlock(roofSize, 0.12f, roofSize, cornerRadius * 0.8f, 5),
-                Color.Lerp(color, Color.black, 0.32f));
+                Color.Lerp(color, Color.black, 0.22f)); // keep the hue readable on the roof
             roof.transform.localPosition = new Vector3(0f, bodyHeight, 0f);
 
             var door = MeshFactory.CreatePart(t, "Door",

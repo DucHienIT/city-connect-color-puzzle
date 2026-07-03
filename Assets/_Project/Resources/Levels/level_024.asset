@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a3d820b7f1c52e6f7e8d9c0b45a0307, type: 3}
+  m_Name: level_024
+  m_EditorClassIdentifier: 
+  data:
+    levelId: 24
+    gridWidth: 9
+    gridHeight: 9
+    groups:
+    - color: red
+      city:
+        x: 6
+        y: 7
+      houses:
+      - x: 4
+        y: 6
+    - color: blue
+      city:
+        x: 8
+        y: 3
+      houses:
+      - x: 7
+        y: 2
+      - x: 5
+        y: 0
+      - x: 7
+        y: 5
+    - color: yellow
+      city:
+        x: 5
+        y: 6
+      houses:
+      - x: 3
+        y: 5
+      - x: 8
+        y: 8
+    - color: green
+      city:
+        x: 6
+        y: 1
+      houses:
+      - x: 7
+        y: 1
+      - x: 3
+        y: 3
+    - color: orange
+      city:
+        x: 3
+        y: 2
+      houses:
+      - x: 0
+        y: 3
+      - x: 1
+        y: 4
+    - color: purple
+      city:
+        x: 0
+        y: 4
+      houses:
+      - x: 1
+        y: 8
+    - color: cyan
+      city:
+        x: 3
+        y: 0
+      houses:
+      - x: 1
+        y: 0
+      - x: 4
+        y: 0
+    - color: pink
+      city:
+        x: 4
+        y: 8
+      houses:
+      - x: 6
+        y: 8
+      - x: 1
+        y: 7
+    obstacles:
+    - x: 8
+      y: 7
+    - x: 4
+      y: 1

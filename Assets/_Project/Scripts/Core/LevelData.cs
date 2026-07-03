@@ -29,7 +29,8 @@ namespace TinyTownRoads
     }
 
     /// <summary>
-    /// One puzzle level, deserialized from JSON (see docs/GAME_SPEC.md section 3).
+    /// One puzzle level (see docs/GAME_SPEC.md section 3). Pure serializable data;
+    /// shipped levels wrap it in a LevelAsset ScriptableObject under Resources/Levels.
     /// </summary>
     [Serializable]
     public class LevelData
@@ -39,17 +40,5 @@ namespace TinyTownRoads
         public int gridHeight;
         public List<ColorGroup> groups = new List<ColorGroup>();
         public List<CellCoord> obstacles = new List<CellCoord>();
-
-        public static LevelData FromJson(string json)
-        {
-            var data = JsonUtility.FromJson<LevelData>(json);
-            if (data.groups == null) data.groups = new List<ColorGroup>();
-            if (data.obstacles == null) data.obstacles = new List<CellCoord>();
-            foreach (var group in data.groups)
-                if (group.houses == null) group.houses = new List<CellCoord>();
-            return data;
-        }
-
-        public string ToJson() => JsonUtility.ToJson(this, true);
     }
 }
