@@ -10,7 +10,8 @@ namespace TinyTownRoads
     /// </summary>
     public class GameBootstrap : MonoBehaviour
     {
-        static readonly Color CameraBackground = new Color(0.055f, 0.07f, 0.11f);
+        // Light "street" gray around the board, matching the toy-city 3D theme.
+        static readonly Color CameraBackground = new Color(0.855f, 0.835f, 0.784f);
 
         void Awake()
         {
@@ -23,10 +24,13 @@ namespace TinyTownRoads
                 cam = camGo.AddComponent<Camera>();
                 camGo.AddComponent<AudioListener>();
             }
-            cam.orthographic = true;
+            cam.orthographic = false;
+            cam.fieldOfView = 44f;
+            cam.nearClipPlane = 0.5f;
+            cam.farClipPlane = 100f;
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = CameraBackground;
-            cam.transform.position = new Vector3(0f, 0f, -10f);
+            cam.transform.SetPositionAndRotation(new Vector3(0f, 12f, -4f), Quaternion.Euler(72f, 0f, 0f));
 
             if (FindFirstObjectByType<EventSystem>() == null)
             {

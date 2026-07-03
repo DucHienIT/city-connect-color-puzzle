@@ -4,9 +4,10 @@ using UnityEngine;
 namespace TinyTownRoads
 {
     /// <summary>
-    /// Applies one hint: draws the full correct path for the first color whose current
-    /// path differs from a solved solution, truncating any player path it collides with.
-    /// The solution is computed lazily (once per level) via the Solver.
+    /// Applies one hint: draws the full correct branch (house → city) for the first
+    /// house whose current branch differs from a solved solution, truncating any
+    /// player road it collides with. The solution is computed lazily (once per
+    /// level) via the Solver.
     /// </summary>
     public class HintController
     {
@@ -38,45 +39,40 @@ namespace TinyTownRoads
 
             for (int color = 0; color < grid.ColorCount; color++)
             {
-                var target = solution.Paths[color];
-                if (MatchesSolution(paths.GetPath(color), target)) continue;
-
-                var occupied = new HashSet<Vector2Int>(target);
-                for (int other = 0; other < grid.ColorCount; other++)
+                for (int house = 0; house < paths.BranchCount(color); house++)
                 {
-                    if (other == color) continue;
-                    TruncateBeforeConflict(other, occupied);
+                    if (paths.BranchComplete(color, house)) continue;
+
+                    var target = solution.Branches[color][house];
+                    // Road cells only: the shared city cell must not truncate siblings.
+                    var occupied = new HashSet<Vector2Int>(target);
+                    occupied.Remove(grid.City(color));
+
+                    for (int c = 0; c < grid.ColorCount; c++)
+                        for (int h = 0; h < paths.BranchCount(c); h++)
+                        {
+                            if (c == color && h == house) continue;
+                            TruncateBeforeConflict(c, h, occupied);
+                        }
+
+                    paths.SetBranch(color, house, target);
+                    LastHintedColor = color;
+                    return true;
                 }
-                paths.SetPath(color, target);
-                LastHintedColor = color;
-                return true;
             }
-            return false; // everything already matches the solution
+            return false; // every house is already connected
         }
 
-        bool MatchesSolution(IReadOnlyList<Vector2Int> current, List<Vector2Int> target)
+        void TruncateBeforeConflict(int color, int house, HashSet<Vector2Int> occupied)
         {
-            if (current.Count != target.Count) return false;
-            bool forward = true, backward = true;
-            for (int i = 0; i < target.Count; i++)
+            var branch = paths.GetBranch(color, house);
+            for (int i = 0; i < branch.Count; i++)
             {
-                if (current[i] != target[i]) forward = false;
-                if (current[target.Count - 1 - i] != target[i]) backward = false;
-                if (!forward && !backward) return false;
-            }
-            return true;
-        }
-
-        void TruncateBeforeConflict(int color, HashSet<Vector2Int> occupied)
-        {
-            var path = paths.GetPath(color);
-            for (int i = 0; i < path.Count; i++)
-            {
-                if (!occupied.Contains(path[i])) continue;
-                // A pair's own nodes never sit on another color's solution path, so i > 0.
+                if (!occupied.Contains(branch[i])) continue;
+                // A house cell never sits on another branch's solution, so i > 0.
                 var kept = new List<Vector2Int>();
-                for (int k = 0; k < i; k++) kept.Add(path[k]);
-                paths.SetPath(color, kept);
+                for (int k = 0; k < i; k++) kept.Add(branch[k]);
+                paths.SetBranch(color, house, kept);
                 return;
             }
         }

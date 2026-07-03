@@ -26,6 +26,9 @@ namespace TinyTownRoads
         public static readonly Color ButtonColor = new Color(0.20f, 0.24f, 0.34f);
         public static readonly Color TextColor = new Color(0.93f, 0.94f, 0.98f);
         public static readonly Color MutedText = new Color(0.60f, 0.64f, 0.74f);
+        // Dark "ink" tones for text sitting directly on the light 3D city backdrop.
+        public static readonly Color Ink = new Color(0.25f, 0.23f, 0.19f);
+        public static readonly Color InkMuted = new Color(0.47f, 0.44f, 0.38f);
         public static readonly Color DimColor = new Color(0f, 0f, 0f, 0.65f);
 
         public static Canvas CreateCanvas(string name)

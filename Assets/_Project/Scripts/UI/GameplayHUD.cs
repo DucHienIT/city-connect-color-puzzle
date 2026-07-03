@@ -10,7 +10,6 @@ namespace TinyTownRoads
 
         readonly Text levelText;
         readonly Text movesText;
-        readonly Text coverageText;
         readonly Text hintLabel;
 
         public GameplayHUD(Transform parent, GameManager game)
@@ -18,14 +17,11 @@ namespace TinyTownRoads
             var screen = UIFactory.CreateScreen(parent, "GameplayHUD");
             Root = screen.gameObject;
 
-            levelText = UIFactory.CreateText(screen, "Level", "LEVEL 1", 64, UIFactory.TextColor);
+            levelText = UIFactory.CreateText(screen, "Level", "LEVEL 1", 64, UIFactory.Ink);
             UIFactory.Place((RectTransform)levelText.transform, new Vector2(0.5f, 0.955f), Vector2.zero, new Vector2(600, 80));
 
-            movesText = UIFactory.CreateText(screen, "Moves", "MOVES 0", 42, UIFactory.MutedText);
+            movesText = UIFactory.CreateText(screen, "Moves", "MOVES 0", 42, UIFactory.InkMuted);
             UIFactory.Place((RectTransform)movesText.transform, new Vector2(0.5f, 0.915f), Vector2.zero, new Vector2(600, 60));
-
-            coverageText = UIFactory.CreateText(screen, "Coverage", "fill every cell", 32, UIFactory.Accent, FontStyle.Normal);
-            UIFactory.Place((RectTransform)coverageText.transform, new Vector2(0.5f, 0.885f), Vector2.zero, new Vector2(600, 44));
 
             var bar = UIFactory.CreateRect(screen, "Actions");
             UIFactory.Place(bar, new Vector2(0.5f, 0.065f), Vector2.zero, new Vector2(1020, 120));
@@ -54,7 +50,6 @@ namespace TinyTownRoads
         {
             levelText.text = $"LEVEL {level.levelId}";
             movesText.text = $"MOVES  {moves}";
-            coverageText.gameObject.SetActive(level.requireFullCoverage);
             hintLabel.text = $"HINT ({Mathf.Max(hintsLeft, 0)})";
         }
     }

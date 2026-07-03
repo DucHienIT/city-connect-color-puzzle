@@ -16,12 +16,16 @@ namespace TinyTownRoads
         public Vector2Int ToVector() => new Vector2Int(x, y);
     }
 
+    /// <summary>
+    /// One color: a city (hub building) plus the houses that must each be connected
+    /// to it by a road. The city's demand = houses.Count (shown as roof pins).
+    /// </summary>
     [Serializable]
-    public class ColorPair
+    public class ColorGroup
     {
         public string color;
-        public CellCoord start;
-        public CellCoord end;
+        public CellCoord city;
+        public List<CellCoord> houses = new List<CellCoord>();
     }
 
     /// <summary>
@@ -33,15 +37,16 @@ namespace TinyTownRoads
         public int levelId;
         public int gridWidth;
         public int gridHeight;
-        public bool requireFullCoverage;
-        public List<ColorPair> pairs = new List<ColorPair>();
+        public List<ColorGroup> groups = new List<ColorGroup>();
         public List<CellCoord> obstacles = new List<CellCoord>();
 
         public static LevelData FromJson(string json)
         {
             var data = JsonUtility.FromJson<LevelData>(json);
-            if (data.pairs == null) data.pairs = new List<ColorPair>();
+            if (data.groups == null) data.groups = new List<ColorGroup>();
             if (data.obstacles == null) data.obstacles = new List<CellCoord>();
+            foreach (var group in data.groups)
+                if (group.houses == null) group.houses = new List<CellCoord>();
             return data;
         }
 

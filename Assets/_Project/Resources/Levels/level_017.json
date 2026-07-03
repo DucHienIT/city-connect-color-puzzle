@@ -2,149 +2,152 @@
   "levelId": 17,
   "gridWidth": 9,
   "gridHeight": 9,
-  "requireFullCoverage": true,
-  "pairs": [
+  "groups": [
     {
       "color": "red",
-      "start": {
-        "x": 8,
-        "y": 8
+      "city": {
+        "x": 1,
+        "y": 4
       },
-      "end": {
-        "x": 4,
-        "y": 8
-      }
+      "houses": [
+        {
+          "x": 2,
+          "y": 3
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3
+        }
+      ]
     },
     {
       "color": "blue",
-      "start": {
-        "x": 2,
-        "y": 0
+      "city": {
+        "x": 0,
+        "y": 6
       },
-      "end": {
-        "x": 1,
-        "y": 3
-      }
+      "houses": [
+        {
+          "x": 4,
+          "y": 7
+        },
+        {
+          "x": 1,
+          "y": 8
+        }
+      ]
     },
     {
       "color": "yellow",
-      "start": {
-        "x": 0,
-        "y": 2
+      "city": {
+        "x": 4,
+        "y": 1
       },
-      "end": {
-        "x": 3,
-        "y": 5
-      }
+      "houses": [
+        {
+          "x": 6,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 4
+        }
+      ]
     },
     {
       "color": "green",
-      "start": {
-        "x": 0,
-        "y": 5
+      "city": {
+        "x": 6,
+        "y": 6
       },
-      "end": {
-        "x": 2,
-        "y": 7
-      }
+      "houses": [
+        {
+          "x": 5,
+          "y": 6
+        },
+        {
+          "x": 8,
+          "y": 5
+        }
+      ]
     },
     {
       "color": "orange",
-      "start": {
-        "x": 3,
+      "city": {
+        "x": 5,
         "y": 8
       },
-      "end": {
-        "x": 6,
-        "y": 5
-      }
+      "houses": [
+        {
+          "x": 2,
+          "y": 8
+        }
+      ]
     },
     {
       "color": "purple",
-      "start": {
-        "x": 1,
-        "y": 7
+      "city": {
+        "x": 7,
+        "y": 8
       },
-      "end": {
-        "x": 2,
-        "y": 6
-      }
+      "houses": [
+        {
+          "x": 6,
+          "y": 8
+        }
+      ]
     },
     {
       "color": "cyan",
-      "start": {
-        "x": 5,
-        "y": 6
+      "city": {
+        "x": 3,
+        "y": 0
       },
-      "end": {
-        "x": 6,
-        "y": 3
-      }
+      "houses": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0
+        }
+      ]
     },
     {
       "color": "pink",
-      "start": {
+      "city": {
         "x": 6,
-        "y": 7
-      },
-      "end": {
-        "x": 8,
-        "y": 3
-      }
-    },
-    {
-      "color": "brown",
-      "start": {
-        "x": 6,
-        "y": 4
-      },
-      "end": {
-        "x": 2,
-        "y": 2
-      }
-    },
-    {
-      "color": "lime",
-      "start": {
-        "x": 5,
         "y": 3
       },
-      "end": {
-        "x": 4,
-        "y": 2
-      }
-    },
-    {
-      "color": "teal",
-      "start": {
-        "x": 3,
-        "y": 3
-      },
-      "end": {
-        "x": 6,
-        "y": 0
-      }
-    },
-    {
-      "color": "indigo",
-      "start": {
-        "x": 7,
-        "y": 2
-      },
-      "end": {
-        "x": 7,
-        "y": 1
-      }
+      "houses": [
+        {
+          "x": 8,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 3
+        }
+      ]
     }
   ],
   "obstacles": [
     {
-      "x": 4,
-      "y": 3
+      "x": 8,
+      "y": 8
     },
     {
-      "x": 2,
-      "y": 1
+      "x": 5,
+      "y": 0
     }
   ]
 }

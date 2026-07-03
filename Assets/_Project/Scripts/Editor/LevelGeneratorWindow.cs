@@ -12,10 +12,10 @@ namespace TinyTownRoads.EditorTools
     {
         int width = 7;
         int height = 7;
-        int minPairs = 4;
-        int maxPairs = 7;
+        int minColors = 4;
+        int maxColors = 7;
         int obstacleCount = 0;
-        int maxPathLen = 10;
+        int maxBranchLen = 6;
         int count = 5;
         int startId = 100;
         int seed = 0;
@@ -32,10 +32,10 @@ namespace TinyTownRoads.EditorTools
             GUILayout.Label("Board", EditorStyles.boldLabel);
             width = EditorGUILayout.IntSlider("Width", width, 5, 14);
             height = EditorGUILayout.IntSlider("Height", height, 5, 14);
-            minPairs = EditorGUILayout.IntSlider("Min pairs", minPairs, 3, 12);
-            maxPairs = EditorGUILayout.IntSlider("Max pairs", maxPairs, minPairs, 12);
+            minColors = EditorGUILayout.IntSlider("Min colors (cities)", minColors, 2, 12);
+            maxColors = EditorGUILayout.IntSlider("Max colors (cities)", maxColors, minColors, 12);
             obstacleCount = EditorGUILayout.IntSlider("Obstacles", obstacleCount, 0, 6);
-            maxPathLen = EditorGUILayout.IntSlider("Max path length", maxPathLen, 5, 99);
+            maxBranchLen = EditorGUILayout.IntSlider("Max branch length", maxBranchLen, 3, 12);
 
             GUILayout.Space(8);
             GUILayout.Label("Output", EditorStyles.boldLabel);
@@ -57,10 +57,10 @@ namespace TinyTownRoads.EditorTools
             for (int i = 0; i < count; i++)
             {
                 EditorUtility.DisplayProgressBar("Generating levels", $"Level {i + 1}/{count}", i / (float)count);
-                var level = LevelGenerator.Generate(width, height, minPairs, maxPairs, obstacleCount, rng, maxPathLen);
+                var level = LevelGenerator.Generate(width, height, minColors, maxColors, obstacleCount, rng, maxBranchLen);
                 if (level == null)
                 {
-                    Debug.LogWarning($"Could not generate a unique-solution {width}x{height} level (try fewer constraints).");
+                    Debug.LogWarning($"Could not generate a solvable {width}x{height} level (try fewer constraints).");
                     continue;
                 }
                 level.levelId = startId + i;
@@ -79,14 +79,10 @@ namespace TinyTownRoads.EditorTools
             foreach (var file in files)
             {
                 var level = LevelData.FromJson(File.ReadAllText(file));
-                int solutions = Solver.CountSolutions(level, 2);
-                if (solutions == 1) { ok++; continue; }
-                string verdict = solutions == 0 ? "NO solution"
-                    : solutions < 0 ? "budget exhausted (unknown)"
-                    : "MULTIPLE solutions";
-                Debug.LogWarning($"{Path.GetFileName(file)} (level {level.levelId}): {verdict}");
+                if (Solver.Solve(level) != null) { ok++; continue; }
+                Debug.LogWarning($"{Path.GetFileName(file)} (level {level.levelId}): NO solution found");
             }
-            Debug.Log($"Validation: {ok}/{files.Length} levels have a unique solution.");
+            Debug.Log($"Validation: {ok}/{files.Length} levels are solvable.");
         }
     }
 }

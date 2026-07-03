@@ -2,40 +2,45 @@
   "levelId": 1,
   "gridWidth": 5,
   "gridHeight": 5,
-  "requireFullCoverage": true,
-  "pairs": [
+  "groups": [
     {
       "color": "red",
-      "start": {
-        "x": 0,
+      "city": {
+        "x": 3,
         "y": 0
       },
-      "end": {
-        "x": 3,
-        "y": 3
-      }
+      "houses": [
+        {
+          "x": 3,
+          "y": 2
+        }
+      ]
     },
     {
       "color": "blue",
-      "start": {
-        "x": 0,
+      "city": {
+        "x": 3,
         "y": 3
       },
-      "end": {
-        "x": 1,
-        "y": 4
-      }
+      "houses": [
+        {
+          "x": 4,
+          "y": 2
+        }
+      ]
     },
     {
       "color": "yellow",
-      "start": {
-        "x": 2,
-        "y": 0
+      "city": {
+        "x": 4,
+        "y": 4
       },
-      "end": {
-        "x": 1,
-        "y": 1
-      }
+      "houses": [
+        {
+          "x": 2,
+          "y": 4
+        }
+      ]
     }
   ],
   "obstacles": []

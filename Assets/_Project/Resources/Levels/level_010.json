@@ -2,84 +2,87 @@
   "levelId": 10,
   "gridWidth": 7,
   "gridHeight": 7,
-  "requireFullCoverage": true,
-  "pairs": [
+  "groups": [
     {
       "color": "red",
-      "start": {
-        "x": 6,
-        "y": 6
+      "city": {
+        "x": 3,
+        "y": 3
       },
-      "end": {
-        "x": 1,
-        "y": 5
-      }
+      "houses": [
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 4
+        }
+      ]
     },
     {
       "color": "blue",
-      "start": {
-        "x": 6,
-        "y": 5
+      "city": {
+        "x": 5,
+        "y": 2
       },
-      "end": {
-        "x": 1,
-        "y": 4
-      }
+      "houses": [
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        }
+      ]
     },
     {
       "color": "yellow",
-      "start": {
+      "city": {
         "x": 0,
-        "y": 4
+        "y": 3
       },
-      "end": {
-        "x": 4,
-        "y": 0
-      }
+      "houses": [
+        {
+          "x": 2,
+          "y": 6
+        },
+        {
+          "x": 0,
+          "y": 1
+        }
+      ]
     },
     {
       "color": "green",
-      "start": {
-        "x": 2,
+      "city": {
+        "x": 4,
         "y": 0
       },
-      "end": {
-        "x": 0,
-        "y": 0
-      }
+      "houses": [
+        {
+          "x": 2,
+          "y": 0
+        }
+      ]
     },
     {
       "color": "orange",
-      "start": {
-        "x": 1,
-        "y": 2
+      "city": {
+        "x": 3,
+        "y": 6
       },
-      "end": {
-        "x": 5,
-        "y": 2
-      }
-    },
-    {
-      "color": "purple",
-      "start": {
-        "x": 5,
-        "y": 5
-      },
-      "end": {
-        "x": 2,
-        "y": 4
-      }
-    },
-    {
-      "color": "cyan",
-      "start": {
-        "x": 4,
-        "y": 1
-      },
-      "end": {
-        "x": 5,
-        "y": 0
-      }
+      "houses": [
+        {
+          "x": 5,
+          "y": 6
+        }
+      ]
     }
   ],
   "obstacles": []

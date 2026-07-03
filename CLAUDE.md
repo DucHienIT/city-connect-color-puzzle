@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A Unity 6 (`6000.3.9f1`) mobile puzzle game — Flow Free–style "connect same-colored dots" with a city theme (working title **"Tiny Town Roads"**, namespace `TinyTownRoads`). Built on URP (2D renderer) + the new Input System. The design document is [docs/GAME_SPEC.md](docs/GAME_SPEC.md) (Vietnamese); its checklist items 1–13 are implemented, 14–16 (rewarded ads, IAP, device builds) are not.
+A Unity 6 (`6000.3.9f1`) mobile puzzle game — draw road branches connecting each **house** to its same-colored **city**; a city's roof pins show how many houses it demands (1–4). City theme, working title **"Tiny Town Roads"**, namespace `TinyTownRoads`. Built on URP (Universal/3D renderer — `Assets/Settings/UniversalRenderer.asset`, wired into `UniversalRP.asset`) + the new Input System. Gameplay renders as a 3D "toy town" (tilted top-down perspective camera, procedural meshes); UI stays uGUI overlay. The design document is [docs/GAME_SPEC.md](docs/GAME_SPEC.md) (Vietnamese); its checklist items 1–13 are implemented, 14–16 (rewarded ads, IAP, device builds) are not.
 
 Work happens on the `dev` branch; `main` is the PR target.
 
@@ -13,31 +13,34 @@ Work happens on the `dev` branch; `main` is the PR target.
 All game code is under `Assets/_Project/Scripts/`. The core principle: **everything is built at runtime from code** — no prefabs and no image/audio assets. To play: open `Assets/_Project/Scenes/Game.unity` (first scene in Build Settings) and press Play.
 
 - `Gameplay/GameBootstrap.cs` — the only component placed in the scene. Creates the EventSystem, AudioManager, UIController and GameManager in `Awake`.
-- **Pure-logic core, no MonoBehaviours** (`Core/`): `GridModel` (immutable board), `PathManager` (path state + all drawing rules from spec §2.2; views subscribe to its `PathChanged` event), `Solver` (backtracking, counts solutions for uniqueness validation and powers hints), `LevelGenerator` (random-walk grid fill), `LevelData`/`LevelLoader` (JSON via `JsonUtility` from `Resources/Levels`).
-- **Views/input** (`Gameplay/`): `GridView` (board + world↔grid conversion, cell size 1, board centered at origin), `NodeView` (procedural "building"), `PathRenderer` (pooled sprite segments), `InputController` → `PathDrawer` (pointer drags → L-stepped path edits; a "move" = a completed drag that changed any path), `GameManager` (level lifecycle, undo stack of pre-drag snapshots, win → stars → save).
+- **Pure-logic core, no MonoBehaviours** (`Core/`): `GridModel` (immutable board; each color = one city + 1–4 houses), `PathManager` (road state + all drawing rules from spec §2.2 — **one branch per house**, drags start on houses or road cells, never cities; branches block each other, siblings included, and only meet at the shared city cell where they terminate; views subscribe to its `PathChanged` event), `Solver` (backtracking; routes each house's branch to its city — validates solvability and powers hints, one full branch per hint), `LevelGenerator` (plants cities on free cells, grows 1–4 non-crossing random-walk branches per city; branch ends become houses, so levels are solvable by construction), `LevelData`/`LevelLoader` (JSON via `JsonUtility` from `Resources/Levels`). **Win = every city has all its houses connected; grid coverage is NOT required.**
+- **Views/input** (`Gameplay/`): the board lives on the XZ ground plane (cell size 1, centered at origin, playable surface at y = 0; grid y maps to world z). `GridView` (base plate + cell dots + obstacles, screen-ray→cell conversion via a y = 0 plane raycast), `NodeView` (3D buildings — `CreateCity`: big block with demand pins on the roof plate; `CreateHouse`: small block with a tinted car parked on the roof), `PathRenderer` (pooled 3D road pieces — asphalt segments, round joints deduped at the shared city cell, white dashes) + `CarView` (one car per house: parked at the drawing head, drives into the city and vanishes when its branch connects, via `DOPath`), `InputController` → `PathDrawer` (pointer drags → L-stepped branch edits; a "move" = a completed drag that changed any road), `GameManager` (level lifecycle, undo stack of pre-drag snapshots, win → stars → save; `FitCamera` walks the tilted perspective camera back until the board fits a HUD-safe viewport band). Stars: 3 = moves ≤ total house count, 2 = within +2, else 1.
+- **3D look** (`Utils/MeshFactory.cs` + `Assets/_Project/Shaders/VertexColor.shader`): all meshes are generated in code (rounded blocks, discs, the car) with a fixed sun baked into vertex colors; one shared unlit material, per-object tint via `MaterialPropertyBlock` (linear-space encoded). No lights, no shadows, no mesh assets.
 - **UI** (`UI/`): `UIFactory` builds uGUI from code — legacy `Text` with `LegacyRuntime.ttf`, **deliberately not TMP** (avoids TMP resource import); `SpriteFactory` generates all sprites (rounded rects, circles, stars) as white textures tinted per use. Screens are plain classes toggled by `UIController`.
 - **Systems**: `SaveSystem` (PlayerPrefs, keys prefixed `ttr_`; stars per levelId, daily hint allowance), `AudioManager` (all SFX/music synthesized with `AudioClip.Create` — draw blips rise in pitch with path length).
-- Stars: 3 = moves ≤ pair count, 2 = within +2, else 1. A level unlocks when the previous one has ≥1 star.
+- A level unlocks when the previous one has ≥1 star.
 
 ## Levels
 
-JSON files `Assets/_Project/Resources/Levels/level_NNN.json` (24 shipped, 5x5→9x9, all `requireFullCoverage: true`, all solver-verified unique-solution). Generate/validate via **Tools → Tiny Town Roads → Level Generator** in the editor.
+JSON files `Assets/_Project/Resources/Levels/level_NNN.json` (24 shipped, 5x5→9x9, all solver-verified solvable; format: `groups` of `{color, city, houses[]}`). Generate/validate via **Tools → Tiny Town Roads → Level Generator** in the editor (uniqueness is not a criterion — solvability only). Shipped progression: 5x5 → 2–3 cities/branchLen 4, 6x6 → 3–4/5, 7x7 → 4–5/6, 8x8 → 5–7/6, 9x9 → 6–8/7 with 2 obstacles.
 
-**Hard-won generation parameters** (unique solutions are vanishingly rare otherwise): cap random-walk path length and use many pairs — 5x5/6x6 uncapped, 7x7 → maxLen 9 with 6–9 pairs, 8x8 → maxLen 7 with 8–11 pairs, 9x9 → maxLen 7 with 10–12 pairs **and 2 obstacles** (obstacles break symmetry; without them 9x9 uniqueness is nearly unreachable). If generation fails, vary the seed before loosening parameters.
+The shipped 24 levels were regenerated by a standalone harness (core logic compiled against `UnityEngine.CoreModule` and run under plain .NET — the core is engine-independent, only `JsonUtility` isn't callable outside Unity, so the harness writes JSON itself).
 
 ## Development Workflow
 
 Unity Editor–driven; no standalone build/test CLI. Options:
 
 - **Unity MCP** (`com.coplaydev.unity-mcp`) is installed — when connected, use it (see `unity-mcp-skill`) to edit scenes, run tests, and read console output instead of hand-editing `.unity` YAML.
-- **Fast compile check without Unity** (works while the editor is open; catches all C# errors — reference list comes from the Unity-generated csproj):
+- **Fast compile check without Unity** (works while the editor is open; catches all C# errors — reference list comes from the Unity-generated csproj). Use a response file (the argument list is too long for a direct command line) and include the firstpass sources too (DOTween's loose `Modules/*.cs` provide extensions like `CanvasGroup.DOFade` that game code calls):
   ```bash
   UNITY="/c/Program Files/Unity/Hub/Editor/6000.3.9f1/Editor/Data"
-  grep -oE '<HintPath>[^<]+</HintPath>' Assembly-CSharp.csproj | sed 's/<[^>]*>//g' > /tmp/refs.txt
-  REFS=""; while IFS= read -r p; do REFS="$REFS -r:\"$p\""; done < /tmp/refs.txt
-  SRC=$(find Assets/_Project/Scripts -name "*.cs" ! -path "*/Editor/*" | sed 's/.*/"&"/' | tr '\n' ' ')
-  eval "\"$UNITY/NetCoreRuntime/dotnet.exe\" \"$UNITY/DotNetSdkRoslyn/csc.dll\" -nologo -target:library \
-    -nostdlib -noconfig -out:/tmp/Runtime.dll $REFS $SRC"
+  {
+    grep -oE '<HintPath>[^<]+</HintPath>' Assembly-CSharp.csproj | sed 's/<[^>]*>//g' | sed 's/.*/-r:"&"/'
+    find Assets/_Project/Scripts -name "*.cs" ! -path "*/Editor/*" | sed 's/.*/"&"/'
+    grep -oE '<Compile Include="[^"]+"' Assembly-CSharp-firstpass.csproj | sed 's/<Compile Include="//;s/"$//' | grep -vi '\\\\Editor\\\\' | sed 's/.*/"&"/'
+  } > /tmp/csc.rsp
+  "$UNITY/NetCoreRuntime/dotnet.exe" "$UNITY/DotNetSdkRoslyn/csc.dll" -nologo -target:library \
+    -nostdlib -noconfig -out:/tmp/Runtime.dll @/tmp/csc.rsp
   ```
   (Editor scripts: add `-define:UNITY_EDITOR -r:"$UNITY/Managed/UnityEditor.dll" -r:/tmp/Runtime.dll`.)
 - Batch mode (editor must be closed): `Unity.exe -batchmode -projectPath . -runTests -testPlatform EditMode -testResults results.xml -quit`.

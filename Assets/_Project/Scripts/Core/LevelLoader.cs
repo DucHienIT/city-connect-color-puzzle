@@ -17,7 +17,7 @@ namespace TinyTownRoads
         {
             levels = Resources.LoadAll<TextAsset>(ResourcesFolder)
                 .Select(asset => LevelData.FromJson(asset.text))
-                .Where(level => level.pairs.Count > 0)
+                .Where(level => level.groups.Count > 0)
                 .OrderBy(level => level.levelId)
                 .ToList();
 

@@ -5,169 +5,202 @@ using UnityEngine;
 namespace TinyTownRoads
 {
     /// <summary>
-    /// Mutable path state for the current level plus the drawing rules from
-    /// GAME_SPEC.md section 2.2. Each color's path is an ordered cell list that
-    /// always starts at one of its two nodes.
+    /// Mutable road state for the current level plus the drawing rules from
+    /// GAME_SPEC.md section 2.2. Each house owns one branch: an ordered cell list
+    /// starting at the house; the branch is complete when it reaches the color's
+    /// city, and a color is complete when every one of its houses is connected.
+    /// Branches never overlap anything (not even siblings); they only share the
+    /// city cell, where they all terminate.
     /// </summary>
     public class PathManager
     {
         readonly GridModel grid;
-        readonly List<Vector2Int>[] paths;
+        readonly List<Vector2Int>[][] branches;   // [color][houseIndex]
 
-        /// <summary>Raised with the color index whose path changed (-1 = every color).</summary>
+        /// <summary>Raised with the color index whose roads changed (-1 = every color).</summary>
         public event Action<int> PathChanged;
 
-        /// <summary>Increases every time any path changes; lets callers detect edits cheaply.</summary>
+        /// <summary>Increases every time any branch changes; lets callers detect edits cheaply.</summary>
         public int Version { get; private set; }
 
         public PathManager(GridModel grid)
         {
             this.grid = grid;
-            paths = new List<Vector2Int>[grid.ColorCount];
-            for (int i = 0; i < paths.Length; i++) paths[i] = new List<Vector2Int>();
+            branches = new List<Vector2Int>[grid.ColorCount][];
+            for (int c = 0; c < branches.Length; c++)
+            {
+                branches[c] = new List<Vector2Int>[grid.Houses(c).Count];
+                for (int h = 0; h < branches[c].Length; h++)
+                    branches[c][h] = new List<Vector2Int>();
+            }
         }
 
-        public IReadOnlyList<Vector2Int> GetPath(int color) => paths[color];
+        public int BranchCount(int color) => branches[color].Length;
 
+        public IReadOnlyList<Vector2Int> GetBranch(int color, int house) => branches[color][house];
+
+        public bool BranchComplete(int color, int house)
+        {
+            var b = branches[color][house];
+            return b.Count >= 2 && b[b.Count - 1] == grid.City(color);
+        }
+
+        /// <summary>A color is complete when every house is connected to the city.</summary>
         public bool IsComplete(int color)
         {
-            var p = paths[color];
-            if (p.Count < 2) return false;
-            var a = grid.NodeA(color);
-            var b = grid.NodeB(color);
-            var first = p[0];
-            var last = p[p.Count - 1];
-            return (first == a && last == b) || (first == b && last == a);
+            for (int h = 0; h < branches[color].Length; h++)
+                if (!BranchComplete(color, h)) return false;
+            return true;
         }
 
         public bool AllComplete()
         {
-            for (int i = 0; i < paths.Length; i++)
-                if (!IsComplete(i)) return false;
+            for (int c = 0; c < branches.Length; c++)
+                if (!IsComplete(c)) return false;
             return true;
         }
 
-        /// <summary>Color whose path covers this cell, or -1.</summary>
-        public int OwnerAt(Vector2Int cell)
+        /// <summary>Finds the branch covering a cell (cities are excluded — they are shared).</summary>
+        bool FindBranchAt(Vector2Int cell, out int color, out int house)
         {
-            for (int i = 0; i < paths.Length; i++)
-                if (paths[i].Contains(cell)) return i;
-            return -1;
+            for (int c = 0; c < branches.Length; c++)
+            {
+                if (cell == grid.City(c)) continue;
+                for (int h = 0; h < branches[c].Length; h++)
+                {
+                    if (branches[c][h].Contains(cell))
+                    {
+                        color = c;
+                        house = h;
+                        return true;
+                    }
+                }
+            }
+            color = house = -1;
+            return false;
         }
 
+        /// <summary>True if any branch of any color occupies this road cell.</summary>
+        public bool IsRoadAt(Vector2Int cell) => FindBranchAt(cell, out _, out _);
+
         /// <summary>
-        /// Starts a drag at a cell. On a node the color's path restarts from that node;
-        /// on an existing path the path is truncated to that cell and drawing resumes.
-        /// Returns the active color, or -1 if the cell cannot start a drag.
+        /// Starts a drag. On a house the house's branch restarts from it; on a branch
+        /// road cell the branch is truncated to that cell and drawing resumes. Cities
+        /// cannot start a drag. Returns false when nothing can be dragged here.
         /// </summary>
-        public int BeginDrag(Vector2Int cell)
+        public bool BeginDrag(Vector2Int cell, out int color, out int house)
         {
-            if (!grid.InBounds(cell) || grid.IsObstacle(cell)) return -1;
+            color = house = -1;
+            if (!grid.InBounds(cell) || grid.IsObstacle(cell)) return false;
 
             int node = grid.NodeColorAt(cell);
             if (node >= 0)
             {
-                var p = paths[node];
-                if (p.Count != 1 || p[0] != cell)
+                if (grid.IsCityAt(cell)) return false;
+                color = node;
+                house = grid.HouseIndexAt(node, cell);
+                var b = branches[color][house];
+                if (b.Count != 1 || b[0] != cell)
                 {
-                    p.Clear();
-                    p.Add(cell);
-                    Notify(node);
+                    b.Clear();
+                    b.Add(cell);
+                    Notify(color);
                 }
-                return node;
+                return true;
             }
 
-            int owner = OwnerAt(cell);
-            if (owner >= 0)
+            if (FindBranchAt(cell, out color, out house))
             {
-                TruncateTo(owner, cell);
-                return owner;
+                TruncateTo(color, house, cell);
+                return true;
             }
-            return -1;
+            return false;
         }
 
         /// <summary>
-        /// Tries to extend a color's path by one adjacent cell, applying the rules:
-        /// backtracking over the own path truncates it, other colors and obstacles block,
-        /// reaching the far node completes the pair. Returns true if the path changed.
+        /// Tries to extend a house's branch by one adjacent cell, applying the rules:
+        /// backtracking over the own branch truncates it, every other node/road blocks,
+        /// and reaching the own city completes the branch. Returns true if changed.
         /// </summary>
-        public bool Extend(int color, Vector2Int cell)
+        public bool Extend(int color, int house, Vector2Int cell)
         {
-            var p = paths[color];
-            if (p.Count == 0 || IsComplete(color)) return false;
+            var b = branches[color][house];
+            if (b.Count == 0 || BranchComplete(color, house)) return false;
             if (!grid.InBounds(cell) || grid.IsObstacle(cell)) return false;
 
-            var head = p[p.Count - 1];
+            var head = b[b.Count - 1];
             if (cell == head || !GridUtils.AreAdjacent(head, cell)) return false;
 
-            int existing = p.IndexOf(cell);
+            int existing = b.IndexOf(cell);
             if (existing >= 0)
             {
-                p.RemoveRange(existing + 1, p.Count - existing - 1);
+                b.RemoveRange(existing + 1, b.Count - existing - 1);
                 Notify(color);
                 return true;
             }
 
-            int node = grid.NodeColorAt(cell);
-            if (node >= 0 && node != color) return false;
-            if (node < 0 && OwnerAt(cell) >= 0) return false;
+            if (cell == grid.City(color))
+            {
+                b.Add(cell);
+                Notify(color);
+                return true;
+            }
 
-            p.Add(cell);
+            if (grid.NodeColorAt(cell) >= 0) return false;   // houses and other cities block
+            if (IsRoadAt(cell)) return false;                // all roads block, siblings included
+
+            b.Add(cell);
             Notify(color);
             return true;
         }
 
-        void TruncateTo(int color, Vector2Int cell)
+        void TruncateTo(int color, int house, Vector2Int cell)
         {
-            var p = paths[color];
-            int idx = p.IndexOf(cell);
-            if (idx < 0 || idx == p.Count - 1) return;
-            p.RemoveRange(idx + 1, p.Count - idx - 1);
+            var b = branches[color][house];
+            int idx = b.IndexOf(cell);
+            if (idx < 0 || idx == b.Count - 1) return;
+            b.RemoveRange(idx + 1, b.Count - idx - 1);
             Notify(color);
         }
 
-        public void SetPath(int color, IEnumerable<Vector2Int> cells)
+        public void SetBranch(int color, int house, IEnumerable<Vector2Int> cells)
         {
-            paths[color].Clear();
-            paths[color].AddRange(cells);
-            Notify(color);
-        }
-
-        public void Clear(int color)
-        {
-            if (paths[color].Count == 0) return;
-            paths[color].Clear();
+            branches[color][house].Clear();
+            branches[color][house].AddRange(cells);
             Notify(color);
         }
 
         public void ClearAll()
         {
-            foreach (var p in paths) p.Clear();
+            foreach (var color in branches)
+                foreach (var b in color)
+                    b.Clear();
             Notify(-1);
         }
 
-        public List<Vector2Int>[] Snapshot()
+        public List<Vector2Int>[][] Snapshot()
         {
-            var copy = new List<Vector2Int>[paths.Length];
-            for (int i = 0; i < paths.Length; i++) copy[i] = new List<Vector2Int>(paths[i]);
+            var copy = new List<Vector2Int>[branches.Length][];
+            for (int c = 0; c < branches.Length; c++)
+            {
+                copy[c] = new List<Vector2Int>[branches[c].Length];
+                for (int h = 0; h < branches[c].Length; h++)
+                    copy[c][h] = new List<Vector2Int>(branches[c][h]);
+            }
             return copy;
         }
 
-        public void Restore(List<Vector2Int>[] snapshot)
+        public void Restore(List<Vector2Int>[][] snapshot)
         {
-            for (int i = 0; i < paths.Length; i++)
+            for (int c = 0; c < branches.Length; c++)
             {
-                paths[i].Clear();
-                paths[i].AddRange(snapshot[i]);
+                for (int h = 0; h < branches[c].Length; h++)
+                {
+                    branches[c][h].Clear();
+                    branches[c][h].AddRange(snapshot[c][h]);
+                }
             }
             Notify(-1);
-        }
-
-        public int CoveredCellCount()
-        {
-            var covered = new HashSet<Vector2Int>();
-            foreach (var p in paths) covered.UnionWith(p);
-            return covered.Count;
         }
 
         void Notify(int color)

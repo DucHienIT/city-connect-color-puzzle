@@ -2,95 +2,129 @@
   "levelId": 13,
   "gridWidth": 8,
   "gridHeight": 8,
-  "requireFullCoverage": true,
-  "pairs": [
+  "groups": [
     {
       "color": "red",
-      "start": {
-        "x": 7,
-        "y": 0
+      "city": {
+        "x": 1,
+        "y": 6
       },
-      "end": {
-        "x": 6,
-        "y": 4
-      }
+      "houses": [
+        {
+          "x": 2,
+          "y": 7
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 7
+        }
+      ]
     },
     {
       "color": "blue",
-      "start": {
-        "x": 5,
-        "y": 1
+      "city": {
+        "x": 2,
+        "y": 3
       },
-      "end": {
-        "x": 7,
-        "y": 1
-      }
+      "houses": [
+        {
+          "x": 2,
+          "y": 6
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 4
+        }
+      ]
     },
     {
       "color": "yellow",
-      "start": {
-        "x": 7,
-        "y": 3
-      },
-      "end": {
+      "city": {
         "x": 3,
-        "y": 6
-      }
+        "y": 4
+      },
+      "houses": [
+        {
+          "x": 3,
+          "y": 6
+        }
+      ]
     },
     {
       "color": "green",
-      "start": {
-        "x": 6,
-        "y": 5
+      "city": {
+        "x": 5,
+        "y": 7
       },
-      "end": {
-        "x": 1,
-        "y": 5
-      }
+      "houses": [
+        {
+          "x": 5,
+          "y": 5
+        },
+        {
+          "x": 3,
+          "y": 7
+        }
+      ]
     },
     {
       "color": "orange",
-      "start": {
-        "x": 5,
-        "y": 5
+      "city": {
+        "x": 6,
+        "y": 2
       },
-      "end": {
-        "x": 2,
-        "y": 1
-      }
+      "houses": [
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 6,
+          "y": 5
+        },
+        {
+          "x": 7,
+          "y": 4
+        }
+      ]
     },
     {
       "color": "purple",
-      "start": {
-        "x": 2,
-        "y": 5
+      "city": {
+        "x": 7,
+        "y": 1
       },
-      "end": {
-        "x": 2,
-        "y": 7
-      }
+      "houses": [
+        {
+          "x": 7,
+          "y": 0
+        }
+      ]
     },
     {
       "color": "cyan",
-      "start": {
-        "x": 0,
-        "y": 5
-      },
-      "end": {
-        "x": 0,
+      "city": {
+        "x": 5,
         "y": 1
-      }
-    },
-    {
-      "color": "pink",
-      "start": {
-        "x": 2,
-        "y": 2
       },
-      "end": {
-        "x": 1,
-        "y": 3
-      }
+      "houses": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 3
+        }
+      ]
     }
   ],
   "obstacles": []

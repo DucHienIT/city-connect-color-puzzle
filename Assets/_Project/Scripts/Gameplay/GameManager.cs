@@ -28,7 +28,7 @@ namespace TinyTownRoads
         int moves;
         bool levelWon;
         Tween winPopupDelay;
-        readonly Stack<List<Vector2Int>[]> undoStack = new Stack<List<Vector2Int>[]>();
+        readonly Stack<List<Vector2Int>[][]> undoStack = new Stack<List<Vector2Int>[][]>();
 
         public int LevelCount => levels.Count;
         public LevelData CurrentLevel => grid?.Level;
@@ -94,14 +94,42 @@ namespace TinyTownRoads
 
         void FitCamera()
         {
-            // Board is centered at origin; leave world-space margins for the HUD bars.
-            float halfW = grid.Width * 0.5f + 0.8f;
-            float halfH = grid.Height * 0.5f + 2.6f;
-            cam.transform.position = new Vector3(0f, 0f, -10f);
-            cam.orthographicSize = Mathf.Max(halfH, halfW / cam.aspect);
+            // Tilted top-down perspective view. Push the camera back along its forward
+            // axis until the board's extremes project inside a viewport band that
+            // leaves room for the HUD bars at the top and bottom of the screen.
+            var rot = Quaternion.Euler(72f, 0f, 0f);
+            var fwd = rot * Vector3.forward;
+            cam.transform.rotation = rot;
+
+            float halfW = grid.Width * 0.5f + 0.55f;
+            float halfH = grid.Height * 0.5f + 0.55f;
+            var extremes = new[]
+            {
+                new Vector3(-halfW, 0f, -halfH), new Vector3(halfW, 0f, -halfH),
+                new Vector3(-halfW, 0f, halfH), new Vector3(halfW, 0f, halfH),
+                new Vector3(-halfW, 0.8f, halfH), new Vector3(halfW, 0.8f, halfH),
+                new Vector3(-halfW, 0.8f, -halfH), new Vector3(halfW, 0.8f, -halfH),
+            };
+
+            float dist = 4f;
+            for (int i = 0; i < 60 && !BoardFits(dist, fwd, extremes); i++)
+                dist *= 1.06f;
+            cam.transform.position = -fwd * dist;
         }
 
-        void OnDragEnded(bool changed, List<Vector2Int>[] preDragSnapshot)
+        bool BoardFits(float dist, Vector3 fwd, Vector3[] points)
+        {
+            cam.transform.position = -fwd * dist;
+            foreach (var p in points)
+            {
+                var v = cam.WorldToViewportPoint(p);
+                if (v.z < 0f || v.x < 0.05f || v.x > 0.95f || v.y < 0.16f || v.y > 0.84f)
+                    return false;
+            }
+            return true;
+        }
+
+        void OnDragEnded(bool changed, List<Vector2Int>[][] preDragSnapshot)
         {
             if (levelWon || !changed) return;
             undoStack.Push(preDragSnapshot);

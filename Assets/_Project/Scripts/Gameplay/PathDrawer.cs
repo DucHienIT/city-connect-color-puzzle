@@ -6,23 +6,24 @@ using UnityEngine.EventSystems;
 namespace TinyTownRoads
 {
     /// <summary>
-    /// Turns pointer presses into path edits: begins a drag on a node or existing path,
-    /// L-steps toward the pointer cell on move, and reports whether the drag changed
-    /// anything on release (that is what counts as a "move").
+    /// Turns pointer presses into road edits: begins a drag on a house or existing
+    /// branch, L-steps the active branch toward the pointer cell on move, and reports
+    /// whether the drag changed anything on release (that is what counts as a "move").
     /// </summary>
     public class PathDrawer : MonoBehaviour
     {
         public bool InputEnabled { get; set; } = true;
 
-        /// <summary>(pathChanged, snapshotBeforeDrag) — raised when a drag ends.</summary>
-        public event Action<bool, List<Vector2Int>[]> DragEnded;
+        /// <summary>(roadsChanged, snapshotBeforeDrag) — raised when a drag ends.</summary>
+        public event Action<bool, List<Vector2Int>[][]> DragEnded;
 
         PathManager paths;
         GridView view;
         Camera cam;
         int activeColor = -1;
+        int activeHouse = -1;
         int dragStartVersion;
-        List<Vector2Int>[] preDragSnapshot;
+        List<Vector2Int>[][] preDragSnapshot;
 
         public void Setup(PathManager pathManager, GridView gridView, Camera camera, InputController input)
         {
@@ -36,6 +37,7 @@ namespace TinyTownRoads
             view = gridView;
             cam = camera;
             activeColor = -1;
+            activeHouse = -1;
         }
 
         void OnPressStarted(Vector2 screenPos)
@@ -46,8 +48,7 @@ namespace TinyTownRoads
 
             preDragSnapshot = paths.Snapshot();
             dragStartVersion = paths.Version;
-            activeColor = paths.BeginDrag(cell);
-            if (activeColor >= 0)
+            if (paths.BeginDrag(cell, out activeColor, out activeHouse))
                 AudioManager.Instance?.PlayPick();
         }
 
@@ -60,10 +61,10 @@ namespace TinyTownRoads
 
         void StepTowards(Vector2Int target)
         {
-            var path = paths.GetPath(activeColor);
-            for (int guard = 0; guard < 64 && path.Count > 0; guard++)
+            var branch = paths.GetBranch(activeColor, activeHouse);
+            for (int guard = 0; guard < 64 && branch.Count > 0; guard++)
             {
-                var head = path[path.Count - 1];
+                var head = branch[branch.Count - 1];
                 if (head == target) return;
 
                 var delta = target - head;
@@ -74,13 +75,13 @@ namespace TinyTownRoads
                     ? new Vector2Int(0, Math.Sign(delta.y))
                     : new Vector2Int(Math.Sign(delta.x), 0);
 
-                if (paths.Extend(activeColor, head + primary))
+                if (paths.Extend(activeColor, activeHouse, head + primary))
                 {
-                    AudioManager.Instance?.PlayDraw(path.Count);
+                    AudioManager.Instance?.PlayDraw(branch.Count);
                 }
-                else if (secondary != Vector2Int.zero && paths.Extend(activeColor, head + secondary))
+                else if (secondary != Vector2Int.zero && paths.Extend(activeColor, activeHouse, head + secondary))
                 {
-                    AudioManager.Instance?.PlayDraw(path.Count);
+                    AudioManager.Instance?.PlayDraw(branch.Count);
                 }
                 else
                 {
@@ -95,6 +96,7 @@ namespace TinyTownRoads
             bool changed = paths.Version != dragStartVersion;
             var snapshot = preDragSnapshot;
             activeColor = -1;
+            activeHouse = -1;
             preDragSnapshot = null;
             DragEnded?.Invoke(changed, snapshot);
         }

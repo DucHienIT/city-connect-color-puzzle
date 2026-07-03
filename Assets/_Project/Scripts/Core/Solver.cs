@@ -5,17 +5,19 @@ using UnityEngine;
 namespace TinyTownRoads
 {
     /// <summary>
-    /// Backtracking solver (GAME_SPEC.md section 4). Routes each color pair with DFS,
-    /// pruning states where remaining endpoints are disconnected or, in full-coverage
-    /// levels, an empty region can no longer be reached by any unfinished color.
-    /// Used by the editor level generator (validation/uniqueness) and the hint system.
+    /// Backtracking solver (GAME_SPEC.md section 4). Each color is one city plus
+    /// N houses; the solver routes one self-avoiding branch per house to the city
+    /// with DFS (branches block each other; the city cell is shared and only ever
+    /// a branch terminus), pruning states where a remaining house can no longer
+    /// share an empty region with its city. Used by the editor level generator
+    /// (validation) and the hint system.
     /// </summary>
     public static class Solver
     {
         public class Result
         {
-            /// <summary>Solution paths indexed by pair index, each from pair.start to pair.end.</summary>
-            public List<Vector2Int>[] Paths;
+            /// <summary>Solution branches indexed [color][house], each from house to city.</summary>
+            public List<Vector2Int>[][] Branches;
         }
 
         const int Empty = -1;
@@ -25,11 +27,11 @@ namespace TinyTownRoads
         {
             public int W, H;
             public int[] Cells;                 // Empty / Obstacle / color index
-            public Vector2Int[] Starts, Ends;
+            public Vector2Int[] Cities;
+            public Vector2Int[][] Houses;
             public int[] Order;                 // color processing order
-            public bool RequireCoverage;
-            public List<Vector2Int>[] Current;
-            public List<Vector2Int>[] First;
+            public List<Vector2Int>[][] Current;
+            public List<Vector2Int>[][] First;
             public int Found, MaxCount;
             public long Budget;
 
@@ -37,12 +39,12 @@ namespace TinyTownRoads
             public bool InBounds(Vector2Int c) => c.x >= 0 && c.x < W && c.y >= 0 && c.y < H;
         }
 
-        /// <summary>Finds one solution, or null if the level is unsolvable.</summary>
+        /// <summary>Finds one solution, or null if none exists (within the search budget).</summary>
         public static Result Solve(LevelData level)
         {
             var ctx = Build(level, 1, 50_000_000);
-            Search(ctx, 0);
-            return ctx.Found > 0 ? new Result { Paths = ctx.First } : null;
+            Search(ctx, 0, 0);
+            return ctx.Found > 0 ? new Result { Branches = ctx.First } : null;
         }
 
         /// <summary>
@@ -52,7 +54,7 @@ namespace TinyTownRoads
         public static int CountSolutions(LevelData level, int max, long budget = 20_000_000)
         {
             var ctx = Build(level, max, budget);
-            Search(ctx, 0);
+            Search(ctx, 0, 0);
             return ctx.Budget <= 0 && ctx.Found < max ? -1 : ctx.Found;
         }
 
@@ -63,78 +65,84 @@ namespace TinyTownRoads
                 W = level.gridWidth,
                 H = level.gridHeight,
                 Cells = new int[level.gridWidth * level.gridHeight],
-                Starts = level.pairs.Select(p => p.start.ToVector()).ToArray(),
-                Ends = level.pairs.Select(p => p.end.ToVector()).ToArray(),
-                RequireCoverage = level.requireFullCoverage,
-                Current = new List<Vector2Int>[level.pairs.Count],
+                Cities = level.groups.Select(g => g.city.ToVector()).ToArray(),
+                Houses = level.groups.Select(g => g.houses.Select(h => h.ToVector()).ToArray()).ToArray(),
+                Current = new List<Vector2Int>[level.groups.Count][],
                 MaxCount = maxCount,
                 Budget = budget,
             };
             for (int i = 0; i < ctx.Cells.Length; i++) ctx.Cells[i] = Empty;
             foreach (var o in level.obstacles) ctx.Cells[ctx.Idx(o.ToVector())] = Obstacle;
-            for (int i = 0; i < ctx.Starts.Length; i++)
+            for (int c = 0; c < ctx.Cities.Length; c++)
             {
-                ctx.Cells[ctx.Idx(ctx.Starts[i])] = i;
-                ctx.Cells[ctx.Idx(ctx.Ends[i])] = i;
-                ctx.Current[i] = new List<Vector2Int>();
+                ctx.Cells[ctx.Idx(ctx.Cities[c])] = c;
+                foreach (var house in ctx.Houses[c]) ctx.Cells[ctx.Idx(house)] = c;
+                ctx.Current[c] = new List<Vector2Int>[ctx.Houses[c].Length];
+                for (int h = 0; h < ctx.Houses[c].Length; h++)
+                    ctx.Current[c][h] = new List<Vector2Int>();
             }
-            // Longest pairs first: they are the most constrained, which prunes earlier.
-            ctx.Order = Enumerable.Range(0, ctx.Starts.Length)
-                .OrderByDescending(i => Mathf.Abs(ctx.Starts[i].x - ctx.Ends[i].x)
-                                      + Mathf.Abs(ctx.Starts[i].y - ctx.Ends[i].y))
+            // Most demanding colors first (total house→city distance) to prune earlier.
+            ctx.Order = Enumerable.Range(0, ctx.Cities.Length)
+                .OrderByDescending(c => ctx.Houses[c].Sum(h =>
+                    Mathf.Abs(h.x - ctx.Cities[c].x) + Mathf.Abs(h.y - ctx.Cities[c].y)))
                 .ToArray();
             return ctx;
         }
 
-        static void Search(Ctx ctx, int orderIdx)
+        /// <summary>Routes branch <paramref name="houseIdx"/> of the orderIdx-th color, then advances.</summary>
+        static void Search(Ctx ctx, int orderIdx, int houseIdx)
         {
             if (ctx.Found >= ctx.MaxCount || ctx.Budget <= 0) return;
             if (orderIdx == ctx.Order.Length)
             {
-                if (!ctx.RequireCoverage || IsFull(ctx)) Record(ctx);
+                Record(ctx);
                 return;
             }
             int color = ctx.Order[orderIdx];
-            var path = ctx.Current[color];
-            path.Clear();
-            path.Add(ctx.Starts[color]);
-            Route(ctx, orderIdx, color, ctx.Starts[color]);
-            path.Clear();
+            if (houseIdx == ctx.Houses[color].Length)
+            {
+                if (Prune(ctx, orderIdx + 1)) Search(ctx, orderIdx + 1, 0);
+                return;
+            }
+            var branch = ctx.Current[color][houseIdx];
+            branch.Clear();
+            branch.Add(ctx.Houses[color][houseIdx]);
+            Route(ctx, orderIdx, color, houseIdx, ctx.Houses[color][houseIdx]);
+            branch.Clear();
         }
 
-        static void Route(Ctx ctx, int orderIdx, int color, Vector2Int pos)
+        static void Route(Ctx ctx, int orderIdx, int color, int houseIdx, Vector2Int pos)
         {
             if (ctx.Found >= ctx.MaxCount || --ctx.Budget <= 0) return;
-            var end = ctx.Ends[color];
-            var path = ctx.Current[color];
+            var city = ctx.Cities[color];
+            var branch = ctx.Current[color][houseIdx];
 
             foreach (var dir in GridUtils.Directions)
             {
                 var next = pos + dir;
                 if (!ctx.InBounds(next)) continue;
 
-                if (next == end)
+                if (next == city)
                 {
-                    path.Add(next);
-                    if (Prune(ctx, orderIdx + 1)) Search(ctx, orderIdx + 1);
-                    path.RemoveAt(path.Count - 1);
+                    branch.Add(next);
+                    Search(ctx, orderIdx, houseIdx + 1);
+                    branch.RemoveAt(branch.Count - 1);
                     continue;
                 }
 
                 int idx = ctx.Idx(next);
                 if (ctx.Cells[idx] != Empty) continue;
                 ctx.Cells[idx] = color;
-                path.Add(next);
-                Route(ctx, orderIdx, color, next);
-                path.RemoveAt(path.Count - 1);
+                branch.Add(next);
+                Route(ctx, orderIdx, color, houseIdx, next);
+                branch.RemoveAt(branch.Count - 1);
                 ctx.Cells[idx] = Empty;
             }
         }
 
         /// <summary>
-        /// Necessary-condition check after completing a pair: every unfinished pair's
-        /// endpoints must share an empty region (or be adjacent), and with coverage on,
-        /// every empty region must touch at least one unfinished endpoint.
+        /// Necessary-condition check after completing a color: every remaining color's
+        /// houses must each share an empty region with their city (or touch it).
         /// </summary>
         static bool Prune(Ctx ctx, int fromOrderIdx)
         {
@@ -162,17 +170,12 @@ namespace TinyTownRoads
                 }
             }
 
-            var touched = new bool[regionCount + 1];
             for (int oi = fromOrderIdx; oi < ctx.Order.Length; oi++)
             {
                 int c = ctx.Order[oi];
-                if (!EndpointsConnected(ctx, region, c, touched)) return false;
+                foreach (var house in ctx.Houses[c])
+                    if (!Connected(ctx, region, house, ctx.Cities[c])) return false;
             }
-
-            if (ctx.RequireCoverage)
-                for (int r = 1; r <= regionCount; r++)
-                    if (!touched[r]) return false;
-
             return true;
         }
 
@@ -185,58 +188,39 @@ namespace TinyTownRoads
             stack.Push(i);
         }
 
-        static bool EndpointsConnected(Ctx ctx, int[] region, int color, bool[] touched)
+        static bool Connected(Ctx ctx, int[] region, Vector2Int a, Vector2Int b)
         {
-            var a = ctx.Starts[color];
-            var b = ctx.Ends[color];
-            if (GridUtils.AreAdjacent(a, b))
-            {
-                MarkAdjacentRegions(ctx, region, a, touched, null);
-                MarkAdjacentRegions(ctx, region, b, touched, null);
-                return true;
-            }
+            if (GridUtils.AreAdjacent(a, b)) return true;
+
             var regionsOfA = new List<int>(4);
-            MarkAdjacentRegions(ctx, region, a, touched, regionsOfA);
-            bool connected = false;
+            foreach (var dir in GridUtils.Directions)
+            {
+                var c = a + dir;
+                if (!ctx.InBounds(c)) continue;
+                int r = region[ctx.Idx(c)];
+                if (r != 0) regionsOfA.Add(r);
+            }
             foreach (var dir in GridUtils.Directions)
             {
                 var c = b + dir;
                 if (!ctx.InBounds(c)) continue;
                 int r = region[ctx.Idx(c)];
-                if (r == 0) continue;
-                touched[r] = true;
-                if (regionsOfA.Contains(r)) connected = true;
+                if (r != 0 && regionsOfA.Contains(r)) return true;
             }
-            return connected;
-        }
-
-        static void MarkAdjacentRegions(Ctx ctx, int[] region, Vector2Int cell, bool[] touched, List<int> collect)
-        {
-            foreach (var dir in GridUtils.Directions)
-            {
-                var c = cell + dir;
-                if (!ctx.InBounds(c)) continue;
-                int r = region[ctx.Idx(c)];
-                if (r == 0) continue;
-                touched[r] = true;
-                collect?.Add(r);
-            }
-        }
-
-        static bool IsFull(Ctx ctx)
-        {
-            for (int i = 0; i < ctx.Cells.Length; i++)
-                if (ctx.Cells[i] == Empty) return false;
-            return true;
+            return false;
         }
 
         static void Record(Ctx ctx)
         {
             if (ctx.Found == 0)
             {
-                ctx.First = new List<Vector2Int>[ctx.Current.Length];
-                for (int i = 0; i < ctx.Current.Length; i++)
-                    ctx.First[i] = new List<Vector2Int>(ctx.Current[i]);
+                ctx.First = new List<Vector2Int>[ctx.Current.Length][];
+                for (int c = 0; c < ctx.Current.Length; c++)
+                {
+                    ctx.First[c] = new List<Vector2Int>[ctx.Current[c].Length];
+                    for (int h = 0; h < ctx.Current[c].Length; h++)
+                        ctx.First[c][h] = new List<Vector2Int>(ctx.Current[c][h]);
+                }
             }
             ctx.Found++;
         }
