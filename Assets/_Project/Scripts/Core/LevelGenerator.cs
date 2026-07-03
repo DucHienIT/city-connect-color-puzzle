@@ -49,7 +49,10 @@ namespace TinyTownRoads
                 var free = FreeCells(width, height, used);
                 if (free.Count < 3) break;
 
-                var city = free[rng.Next(free.Count)];
+                // Prefer breathing room: plant cities away from anything already placed.
+                var spaced = free.FindAll(c => FreeNeighbors(c, width, height, used).Count == CountNeighbors(c, width, height));
+                var pool = spaced.Count > 0 ? spaced : free;
+                var city = pool[rng.Next(pool.Count)];
                 used[city.y * width + city.x] = true;
 
                 // Grow 1–4 branches, each starting through a distinct city neighbor.
@@ -123,6 +126,17 @@ namespace TinyTownRoads
                 for (int x = 0; x < width; x++)
                     if (!used[y * width + x]) result.Add(new Vector2Int(x, y));
             return result;
+        }
+
+        static int CountNeighbors(Vector2Int cell, int width, int height)
+        {
+            int count = 0;
+            foreach (var dir in GridUtils.Directions)
+            {
+                var next = cell + dir;
+                if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height) count++;
+            }
+            return count;
         }
 
         static List<Vector2Int> FreeNeighbors(Vector2Int cell, int width, int height, bool[] used)

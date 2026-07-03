@@ -14,54 +14,61 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     levelId: 9
-    gridWidth: 7
-    gridHeight: 7
+    gridWidth: 8
+    gridHeight: 8
     groups:
     - color: red
       city:
-        x: 6
-        y: 3
-      houses:
-      - x: 4
-        y: 3
-      - x: 4
-        y: 1
-    - color: blue
-      city:
-        x: 1
-        y: 5
-      houses:
-      - x: 4
+        x: 3
         y: 4
-      - x: 0
+      houses:
+      - x: 6
         y: 6
       - x: 0
-        y: 4
-      - x: 2
-        y: 4
-    - color: yellow
+        y: 1
+      - x: 4
+        y: 3
+    - color: blue
       city:
-        x: 1
+        x: 4
         y: 1
       houses:
-      - x: 1
+      - x: 5
         y: 0
-      - x: 3
-        y: 3
-      - x: 0
+    - color: yellow
+      city:
+        x: 7
+        y: 0
+      houses:
+      - x: 7
         y: 2
     - color: green
       city:
-        x: 4
-        y: 2
+        x: 7
+        y: 4
       houses:
       - x: 5
+        y: 4
+      - x: 6
         y: 2
+      - x: 5
+        y: 7
     - color: orange
       city:
-        x: 2
-        y: 0
+        x: 3
+        y: 2
       houses:
-      - x: 6
+      - x: 4
+        y: 2
+      - x: 2
         y: 0
+      - x: 2
+        y: 3
+    - color: purple
+      city:
+        x: 1
+        y: 6
+      houses:
+      - x: 3
+        y: 6
     obstacles: []

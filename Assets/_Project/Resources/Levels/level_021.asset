@@ -14,79 +14,83 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     levelId: 21
-    gridWidth: 9
-    gridHeight: 9
+    gridWidth: 10
+    gridHeight: 10
     groups:
     - color: red
       city:
-        x: 5
-        y: 3
+        x: 3
+        y: 8
       houses:
-      - x: 7
-        y: 3
+      - x: 4
+        y: 9
       - x: 3
-        y: 3
+        y: 9
     - color: blue
       city:
-        x: 6
-        y: 8
+        x: 9
+        y: 6
       houses:
-      - x: 8
-        y: 7
-      - x: 8
+      - x: 9
+        y: 3
+      - x: 6
         y: 8
+      - x: 9
+        y: 9
     - color: yellow
       city:
-        x: 5
-        y: 8
-      houses:
-      - x: 1
-        y: 7
-      - x: 6
-        y: 5
-    - color: green
-      city:
-        x: 5
-        y: 4
-      houses:
-      - x: 7
-        y: 4
-    - color: orange
-      city:
-        x: 1
+        x: 9
         y: 1
       houses:
-      - x: 0
-        y: 2
-      - x: 4
-        y: 0
-      - x: 3
-        y: 5
-    - color: purple
+      - x: 6
+        y: 1
+    - color: green
       city:
-        x: 1
+        x: 6
         y: 5
+      houses:
+      - x: 3
+        y: 6
+      - x: 7
+        y: 5
+      - x: 5
+        y: 6
+    - color: orange
+      city:
+        x: 0
+        y: 3
       houses:
       - x: 1
-        y: 4
+        y: 2
+      - x: 1
+        y: 7
+    - color: purple
+      city:
+        x: 0
+        y: 6
+      houses:
       - x: 0
-        y: 8
+        y: 4
     - color: cyan
       city:
-        x: 5
+        x: 3
         y: 2
       houses:
-      - x: 7
-        y: 0
+      - x: 2
+        y: 3
+      - x: 1
+        y: 1
     - color: pink
       city:
-        x: 8
-        y: 5
+        x: 5
+        y: 3
       houses:
-      - x: 7
-        y: 5
+      - x: 5
+        y: 2
+      - x: 4
+        y: 3
     obstacles:
-    - x: 5
-      y: 5
-    - x: 4
-      y: 7
+    - x: 1
+      y: 9
+    - x: 2
+      y: 0

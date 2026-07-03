@@ -14,81 +14,77 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     levelId: 18
-    gridWidth: 9
-    gridHeight: 9
+    gridWidth: 10
+    gridHeight: 10
     groups:
     - color: red
       city:
-        x: 4
-        y: 8
-      houses:
-      - x: 8
-        y: 5
-      - x: 2
-        y: 6
-      - x: 3
+        x: 8
         y: 7
+      houses:
+      - x: 7
+        y: 6
+      - x: 9
+        y: 9
     - color: blue
       city:
-        x: 0
-        y: 8
-      houses:
-      - x: 2
-        y: 4
-    - color: yellow
-      city:
-        x: 4
-        y: 2
-      houses:
-      - x: 1
-        y: 2
-      - x: 3
-        y: 5
-      - x: 4
-        y: 3
-      - x: 5
-        y: 0
-    - color: green
-      city:
-        x: 8
-        y: 1
-      houses:
-      - x: 6
-        y: 0
-      - x: 7
-        y: 2
-      - x: 8
-        y: 4
-    - color: orange
-      city:
-        x: 7
-        y: 3
-      houses:
-      - x: 6
-        y: 2
-    - color: purple
-      city:
-        x: 8
-        y: 8
-      houses:
-      - x: 6
-        y: 7
-    - color: cyan
-      city:
-        x: 2
+        x: 1
         y: 3
       houses:
       - x: 0
         y: 2
-    - color: pink
+    - color: yellow
       city:
-        x: 1
-        y: 8
+        x: 4
+        y: 9
+      houses:
+      - x: 1
+        y: 5
+      - x: 4
+        y: 7
+      - x: 6
+        y: 7
+    - color: green
+      city:
+        x: 5
+        y: 5
+      houses:
+      - x: 6
+        y: 5
+    - color: orange
+      city:
+        x: 5
+        y: 0
+      houses:
+      - x: 8
+        y: 1
+      - x: 9
+        y: 1
+    - color: purple
+      city:
+        x: 3
+        y: 3
       houses:
       - x: 2
+        y: 2
+    - color: cyan
+      city:
+        x: 9
         y: 5
+      houses:
+      - x: 6
+        y: 4
+    - color: pink
+      city:
+        x: 5
+        y: 3
+      houses:
+      - x: 4
+        y: 4
+      - x: 4
+        y: 3
     obstacles:
-    - x: 3
-      y: 3
     - x: 4
-      y: 4
+      y: 1
+    - x: 2
+      y: 6

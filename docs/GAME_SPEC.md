@@ -161,7 +161,7 @@ Assets/
 - [x] 8. Viết `HintController` dùng Solver để gợi ý bước tiếp theo.
 - [x] 9. Viết `LevelSelectUI` hiển thị danh sách level + số sao đã đạt (dùng `SaveSystem`).
 - [x] 10. Viết `SaveSystem` lưu tiến trình (PlayerPrefs hoặc JSON file trong `Application.persistentDataPath`).
-- [x] 11. Tạo tối thiểu 20 level mẫu (LevelAsset) tăng dần độ khó (5x5 → 9x9), dùng `LevelGenerator`/tự tay tạo rồi validate bằng `Solver`.
+- [x] 11. Tạo tối thiểu 20 level mẫu (LevelAsset) tăng dần độ khó (6x6 → 10x10), dùng `LevelGenerator`/tự tay tạo rồi validate bằng `Solver`.
 - [x] 12. Thêm âm thanh cơ bản (SFX vẽ đường, SFX thắng màn, nhạc nền) qua `AudioManager`.
 - [x] 13. Polish UI/UX: animation khi hoàn thành đường, hiệu ứng sao, theme màu thành phố (nhà cao tầng, công viên...). *(bản đầu: node "tòa nhà" procedural, DOTween pulse/star pop; art thật có thể thay sau)*
 - [ ] 14. (Tùy chọn) Tích hợp quảng cáo thưởng (rewarded ads) để đổi thêm Hint.

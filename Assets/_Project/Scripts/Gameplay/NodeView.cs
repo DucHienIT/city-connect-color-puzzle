@@ -16,7 +16,7 @@ namespace TinyTownRoads
         {
             const float bodyHeight = 0.55f;
             var view = CreateBase(parent, $"City_{colorIndex}", colorIndex, color, worldPos,
-                0.95f, bodyHeight, 0.22f, roofSize: 0.8f, doorWidth: 0.24f);
+                0.88f, bodyHeight, 0.2f, roofSize: 0.72f, doorWidth: 0.22f);
             var t = view.transform;
 
             var plateColor = new Color(0.97f, 0.95f, 0.91f);
@@ -43,7 +43,7 @@ namespace TinyTownRoads
         {
             const float bodyHeight = 0.36f;
             var view = CreateBase(parent, $"House_{colorIndex}", colorIndex, color, worldPos,
-                0.7f, bodyHeight, 0.16f, roofSize: 0.56f, doorWidth: 0.16f);
+                0.62f, bodyHeight, 0.15f, roofSize: 0.5f, doorWidth: 0.15f);
 
             // A little tinted car parked on the roof marks this as a house to route.
             var roofCar = new GameObject("RoofCar");
