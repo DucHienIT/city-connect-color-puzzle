@@ -168,9 +168,31 @@ namespace TinyTownRoads
                 AudioManager.Instance?.PlayClick();
                 onClick?.Invoke();
             });
+            // Springy squash feedback on press (unscaled → works in the paused popup too).
+            img.gameObject.AddComponent<UIPressEffect>();
             var text = CreateText(img.transform, "Label", label, fontSize, Color.white);
             Stretch((RectTransform)text.transform);
             return button;
+        }
+
+        /// <summary>
+        /// Crisp readable outline for text sitting on a busy/light backdrop: two Outline
+        /// components (a single one only covers the diagonals) plus a drop Shadow.
+        /// </summary>
+        public static void AddOutline(Text text, Color color, float thickness = 3f, bool drop = true)
+        {
+            var o1 = text.gameObject.AddComponent<Outline>();
+            o1.effectColor = color;
+            o1.effectDistance = new Vector2(thickness, -thickness);
+            var o2 = text.gameObject.AddComponent<Outline>();
+            o2.effectColor = color;
+            o2.effectDistance = new Vector2(-thickness, thickness);
+            if (drop)
+            {
+                var sh = text.gameObject.AddComponent<Shadow>();
+                sh.effectColor = new Color(color.r, color.g, color.b, 0.55f);
+                sh.effectDistance = new Vector2(0f, -thickness - 1f);
+            }
         }
 
         /// <summary>Square button showing only an icon (bottom action bar and the like).</summary>

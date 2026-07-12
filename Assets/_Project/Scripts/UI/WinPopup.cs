@@ -10,7 +10,7 @@ namespace TinyTownRoads
 
         readonly RectTransform panel;
         readonly StarRatingUI rating;
-        readonly Text movesText;
+        readonly Text coverageText;
         readonly Button nextButton;
 
         public WinPopup(Transform parent, GameManager game)
@@ -40,9 +40,11 @@ namespace TinyTownRoads
             rating = new StarRatingUI(panel, 170f, 210f);
             UIFactory.Place(rating.Root, new Vector2(0.5f, 0.66f), Vector2.zero, Vector2.zero);
 
-            movesText = UIFactory.CreateText(panel, "Moves", "", 42,
-                theme != null ? UIFactory.Ink : UIFactory.MutedText, FontStyle.Normal, shadow: false);
-            UIFactory.Place((RectTransform)movesText.transform, new Vector2(0.5f, 0.47f), Vector2.zero, new Vector2(700, 60));
+            coverageText = UIFactory.CreateText(panel, "Coverage", "",  42,
+                theme != null ? Color.white : UIFactory.MutedText, FontStyle.Normal, shadow: false);
+            UIFactory.Place((RectTransform)coverageText.transform, new Vector2(0.5f, 0.47f), Vector2.zero, new Vector2(700, 60));
+            // Light text on the blue panel body; subtle dark outline for legibility.
+            if (theme != null) UIFactory.AddOutline(coverageText, new Color(0.06f, 0.13f, 0.28f, 0.85f), 2f, drop: false);
 
             nextButton = UIFactory.CreateButton(panel, "Next", "NEXT LEVEL", new Vector2(560, 125),
                 game.NextLevel, theme != null ? theme.buttonGreen : null, 48);
@@ -57,11 +59,11 @@ namespace TinyTownRoads
             UIFactory.Place((RectTransform)levels.transform, new Vector2(0.5f, 0.1f), Vector2.zero, new Vector2(560, 115));
         }
 
-        public void Show(int stars, int moves, bool hasNext)
+        public void Show(int stars, int coverage, bool hasNext)
         {
             Root.SetActive(true);
             nextButton.gameObject.SetActive(hasNext);
-            movesText.text = $"Solved in {moves} move{(moves == 1 ? "" : "s")}";
+            coverageText.text = $"Town filled: {coverage}%";
             rating.Set(stars, animate: true);
 
             panel.DOKill();

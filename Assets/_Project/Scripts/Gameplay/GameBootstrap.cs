@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
+#if UNITY_WEBGL && !UNITY_EDITOR
+using TTSDK;
+#endif
 
 namespace TinyTownRoads
 {
@@ -16,6 +19,10 @@ namespace TinyTownRoads
         void Awake()
         {
             Application.targetFrameRate = 60;
+
+            // Initialize the TikTok/Douyin minigame SDK first thing on the container.
+            // Any other TT.* API must only be called after the init callback fires.
+            InitTikTokSDK();
 
             var cam = Camera.main;
             if (cam == null)
@@ -48,6 +55,30 @@ namespace TinyTownRoads
             gm.Init(ui, cam, input, drawer);
 
             ui.ShowMainMenu();
+        }
+
+        /// <summary>
+        /// Boots the TikTok/Douyin minigame container SDK. Runs only in the WebGL
+        /// runtime (the SDK has no effect in the Editor or other player targets).
+        /// Gameplay does not block on this — it fires and logs; add any TT.* calls
+        /// that need the container (login, ads, share, …) inside the callback.
+        /// </summary>
+        static void InitTikTokSDK()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            TT.InitSDK((code, env) =>
+            {
+                if (code == 0)
+                {
+                    Debug.Log($"[TTSDK] initialized (env: {env})");
+                    // Safe to call other TT.* APIs from here on.
+                }
+                else
+                {
+                    Debug.LogError($"[TTSDK] init failed, code: {code}");
+                }
+            });
+#endif
         }
     }
 }

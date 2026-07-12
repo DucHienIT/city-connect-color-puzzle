@@ -75,8 +75,10 @@ namespace TinyTownRoads
                     var number = UIFactory.ButtonLabel(button);
                     number.text = level.levelId.ToString();
                     number.fontSize = 68;
-                    number.color = theme != null ? UIFactory.Ink : UIFactory.TextColor;
+                    // White number + dark outline so it reads on the dark-navy cell frame.
+                    number.color = Color.white;
                     if (theme != null) Object.Destroy(number.GetComponent<Shadow>());
+                    UIFactory.AddOutline(number, new Color(0.08f, 0.10f, 0.20f), 3f);
                     var numberRt = (RectTransform)number.transform;
                     numberRt.anchoredPosition = new Vector2(0, 24);
 

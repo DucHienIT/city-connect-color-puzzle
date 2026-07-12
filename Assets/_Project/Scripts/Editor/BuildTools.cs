@@ -2,7 +2,9 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
+#if UNITY_6000_3_OR_NEWER
 using UnityEditor.Toolbars;
+#endif
 using UnityEngine;
 
 namespace TinyTownRoads.EditorTools
@@ -15,13 +17,17 @@ namespace TinyTownRoads.EditorTools
     /// </summary>
     public static class BuildTools
     {
-        const string OutputDir = "Builds/WebGL";
+        // TikTok Mini Games requires the build output folder to be named "tt-minigame"
+        // (the folder ttmg login/init/dev/upload operate on — see docs/huong-dan-build-unity-tiktok.md).
+        const string OutputDir = "Builds/tt-minigame";
 
+#if UNITY_6000_3_OR_NEWER
         [MainToolbarElement("TinyTownRoads/BuildWebGL", defaultDockPosition = MainToolbarDockPosition.Right)]
         static MainToolbarButton CreateToolbarButton()
         {
             return new MainToolbarButton(new MainToolbarContent("Build WebGL"), BuildWebGL);
         }
+#endif
 
         [MenuItem("Build/Build WebGL", priority = 0)]
         public static void BuildWebGL()

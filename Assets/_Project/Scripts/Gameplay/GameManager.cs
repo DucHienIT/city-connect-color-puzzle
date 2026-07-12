@@ -5,9 +5,9 @@ using UnityEngine;
 namespace TinyTownRoads
 {
     /// <summary>
-    /// Orchestrates a play session: level lifecycle, move counting, undo, hints,
-    /// win detection and progress saving. UI screens call into this; it pushes
-    /// state back through UIController.
+    /// Orchestrates a play session: level lifecycle, undo, hints, win detection and
+    /// progress saving. Scoring rewards how much of the grid the roads cover. UI
+    /// screens call into this; it pushes state back through UIController.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -25,7 +25,6 @@ namespace TinyTownRoads
         HintController hints;
 
         int levelIndex;
-        int moves;
         bool levelWon;
         Tween winPopupDelay;
         readonly Stack<List<Vector2Int>[][]> undoStack = new Stack<List<Vector2Int>[][]>();
@@ -75,7 +74,6 @@ namespace TinyTownRoads
             ClearBoard();
 
             levelIndex = index;
-            moves = 0;
             levelWon = false;
             undoStack.Clear();
 
@@ -133,7 +131,6 @@ namespace TinyTownRoads
         {
             if (levelWon || !changed) return;
             undoStack.Push(preDragSnapshot);
-            moves++;
             RefreshHud();
             CheckWin();
         }
@@ -144,13 +141,13 @@ namespace TinyTownRoads
 
             levelWon = true;
             drawer.InputEnabled = false;
-            int stars = WinChecker.CalcStars(grid, moves);
+            int stars = WinChecker.CalcStars(grid, paths);
             SaveSystem.RecordResult(grid.Level.levelId, stars);
             AudioManager.Instance?.PlayWin();
 
             bool hasNext = levelIndex + 1 < levels.Count;
-            int shownMoves = moves;
-            winPopupDelay = DOVirtual.DelayedCall(0.7f, () => ui.ShowWinPopup(stars, shownMoves, hasNext));
+            int shownCoverage = WinChecker.CoveragePercent(grid, paths);
+            winPopupDelay = DOVirtual.DelayedCall(0.7f, () => ui.ShowWinPopup(stars, shownCoverage, hasNext));
         }
 
         public void ResetLevel()
@@ -158,7 +155,6 @@ namespace TinyTownRoads
             if (paths == null) return;
             winPopupDelay?.Kill();
             paths.ClearAll();
-            moves = 0;
             levelWon = false;
             undoStack.Clear();
             drawer.InputEnabled = true;
@@ -191,7 +187,6 @@ namespace TinyTownRoads
             }
 
             undoStack.Push(snapshot);
-            moves++;
             SaveSystem.ConsumeHint();
             if (hints.LastHintedColor >= 0) view.PulsePair(hints.LastHintedColor);
             AudioManager.Instance?.PlayPairComplete();
@@ -219,7 +214,7 @@ namespace TinyTownRoads
 
         void RefreshHud()
         {
-            ui.UpdateHud(grid.Level, moves, SaveSystem.HintsRemainingToday());
+            ui.UpdateHud(grid.Level, WinChecker.CoveragePercent(grid, paths), SaveSystem.HintsRemainingToday());
         }
 
         void ClearBoard()

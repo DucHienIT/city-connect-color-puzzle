@@ -4,7 +4,7 @@ using UnityEngine.UI;
 namespace TinyTownRoads
 {
     /// <summary>
-    /// Top info (level flag + move counter) and the bottom action bar of square
+    /// Top info (level flag + grid coverage) and the bottom action bar of square
     /// icon buttons (menu / reset / undo / hint with its daily count).
     /// </summary>
     public class GameplayHUD
@@ -12,7 +12,7 @@ namespace TinyTownRoads
         public GameObject Root { get; }
 
         readonly Text levelText;
-        readonly Text movesText;
+        readonly Text coverageText;
         readonly Text hintLabel;
 
         public GameplayHUD(Transform parent, GameManager game)
@@ -34,8 +34,10 @@ namespace TinyTownRoads
                 UIFactory.Place((RectTransform)levelText.transform, new Vector2(0.5f, 0.955f), Vector2.zero, new Vector2(600, 80));
             }
 
-            movesText = UIFactory.CreateText(screen, "Moves", "MOVES 0", 40, UIFactory.InkMuted, FontStyle.Bold, shadow: false);
-            UIFactory.Place((RectTransform)movesText.transform, new Vector2(0.5f, 0.905f), Vector2.zero, new Vector2(600, 60));
+            coverageText = UIFactory.CreateText(screen, "Coverage", "FILLED 0%", 40, UIFactory.Ink, FontStyle.Bold, shadow: false);
+            UIFactory.Place((RectTransform)coverageText.transform, new Vector2(0.5f, 0.905f), Vector2.zero, new Vector2(600, 60));
+            // Soft light halo so the small counter separates from the busy 3D town behind it.
+            UIFactory.AddOutline(coverageText, new Color(1f, 1f, 1f, 0.7f), 2f, drop: false);
 
             var bar = UIFactory.CreateRect(screen, "Actions");
             UIFactory.Place(bar, new Vector2(0.5f, 0.07f), Vector2.zero, new Vector2(1020, 160));
@@ -82,10 +84,10 @@ namespace TinyTownRoads
             return button;
         }
 
-        public void UpdateHud(LevelData level, int moves, int hintsLeft)
+        public void UpdateHud(LevelData level, int coverage, int hintsLeft)
         {
             levelText.text = $"LEVEL {level.levelId}";
-            movesText.text = $"MOVES  {moves}";
+            coverageText.text = $"FILLED  {coverage}%";
             int hints = Mathf.Max(hintsLeft, 0);
             hintLabel.text = UIFactory.Theme != null && UIFactory.Theme.iconBulb != null
                 ? $"x{hints}"

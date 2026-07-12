@@ -81,9 +81,9 @@ namespace TinyTownRoads
             hud.Root.SetActive(true);
         }
 
-        public void ShowWinPopup(int stars, int moves, bool hasNext)
+        public void ShowWinPopup(int stars, int coverage, bool hasNext)
         {
-            winPopup.Show(stars, moves, hasNext);
+            winPopup.Show(stars, coverage, hasNext);
         }
 
         public void ShowSettings()
@@ -96,9 +96,9 @@ namespace TinyTownRoads
             settings.Root.SetActive(false);
         }
 
-        public void UpdateHud(LevelData level, int moves, int hintsLeft)
+        public void UpdateHud(LevelData level, int coverage, int hintsLeft)
         {
-            hud.UpdateHud(level, moves, hintsLeft);
+            hud.UpdateHud(level, coverage, hintsLeft);
         }
 
         public void ShowToast(string message)

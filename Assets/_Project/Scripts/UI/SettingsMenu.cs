@@ -28,9 +28,10 @@ namespace TinyTownRoads
             UIFactory.Place(panel, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(780, 760));
 
             var title = UIFactory.CreateText(panel, "Title", "SETTINGS", 60,
-                theme != null ? UIFactory.Ink : UIFactory.TextColor,
-                FontStyle.Bold, shadow: false);
+                Color.white, FontStyle.Bold, shadow: false);
             UIFactory.Place((RectTransform)title.transform, new Vector2(0.5f, 0.84f), Vector2.zero, new Vector2(700, 90));
+            // White title on the blue panel header; dark outline keeps it crisp.
+            if (theme != null) UIFactory.AddOutline(title, new Color(0.06f, 0.13f, 0.28f), 3f);
 
             var sound = UIFactory.CreateButton(panel, "Sound", "", new Vector2(560, 120),
                 ToggleSound, theme != null ? theme.buttonBlue : null);
