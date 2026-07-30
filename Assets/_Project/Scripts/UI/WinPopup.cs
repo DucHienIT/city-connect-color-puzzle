@@ -46,6 +46,23 @@ namespace TinyTownRoads
             // Light text on the blue panel body; subtle dark outline for legibility.
             if (theme != null) UIFactory.AddOutline(coverageText, new Color(0.06f, 0.13f, 0.28f, 0.85f), 2f, drop: false);
 
+            if (PlayableAds.Enabled)
+            {
+                // Playable ad: the install CTA owns the prime slot; no level select in an ad.
+                var install = UIFactory.CreateButton(panel, "Install", "DOWNLOAD", new Vector2(560, 125),
+                    PlayableAds.InstallFullGame, theme != null ? theme.buttonGreen : null, 48);
+                UIFactory.Place((RectTransform)install.transform, new Vector2(0.5f, 0.34f), Vector2.zero, new Vector2(560, 125));
+
+                nextButton = UIFactory.CreateButton(panel, "Next", "NEXT LEVEL", new Vector2(560, 115),
+                    game.NextLevel, theme != null ? theme.buttonYellow : null);
+                UIFactory.Place((RectTransform)nextButton.transform, new Vector2(0.5f, 0.22f), Vector2.zero, new Vector2(560, 115));
+
+                var replayAd = UIFactory.CreateButton(panel, "Replay", "REPLAY", new Vector2(560, 115),
+                    () => game.StartLevel(game.CurrentLevelIndex), theme != null ? theme.buttonBlue : null);
+                UIFactory.Place((RectTransform)replayAd.transform, new Vector2(0.5f, 0.1f), Vector2.zero, new Vector2(560, 115));
+                return;
+            }
+
             nextButton = UIFactory.CreateButton(panel, "Next", "NEXT LEVEL", new Vector2(560, 125),
                 game.NextLevel, theme != null ? theme.buttonGreen : null, 48);
             UIFactory.Place((RectTransform)nextButton.transform, new Vector2(0.5f, 0.34f), Vector2.zero, new Vector2(560, 125));

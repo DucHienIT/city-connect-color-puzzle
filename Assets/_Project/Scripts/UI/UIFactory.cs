@@ -28,13 +28,29 @@ namespace TinyTownRoads
             }
         }
 
+        /// <summary>
+        /// Inject the theme directly (scene-serialized reference in GameBootstrap).
+        /// Luna exports only scene dependencies, so Resources.Load finds nothing there.
+        /// </summary>
+        public static void SetTheme(UITheme injected)
+        {
+            if (injected == null) return;
+            theme = injected;
+            themeSearched = true;
+        }
+
         static Font fallbackFont;
         public static Font Font
         {
             get
             {
                 if (Theme != null && Theme.font != null) return Theme.font;
-                if (fallbackFont == null) fallbackFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                // Non-generic overload: Luna's bridged Resources has no generic version,
+                // and even this one throws NotSupported there — degrade to null (no text)
+                // rather than killing the boot.
+                if (fallbackFont == null)
+                    try { fallbackFont = (Font)Resources.GetBuiltinResource(typeof(Font), "LegacyRuntime.ttf"); }
+                    catch { }
                 return fallbackFont;
             }
         }

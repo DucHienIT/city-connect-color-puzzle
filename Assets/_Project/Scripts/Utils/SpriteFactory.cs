@@ -118,10 +118,13 @@ namespace TinyTownRoads
         {
             var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, false)
             {
-                name = name,
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Bilinear,
             };
+#if !UNITY_LUNA
+            // Luna's bridged Object.name is getter-only; the name is cosmetic anyway.
+            tex.name = name;
+#endif
             var pixels = new Color[Size * Size];
             float half = Size * 0.5f;
             for (int y = 0; y < Size; y++)
@@ -132,7 +135,9 @@ namespace TinyTownRoads
 
             var sprite = Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f),
                 Size, 0, SpriteMeshType.FullRect, border);
+#if !UNITY_LUNA
             sprite.name = name;
+#endif
             return sprite;
         }
     }

@@ -59,13 +59,14 @@ namespace TinyTownRoads
 
         void PlaySfx(AudioClip clip, float pitch)
         {
-            if (!SaveSystem.SoundOn) return;
+            if (clip == null || !SaveSystem.SoundOn) return;
             sfx.pitch = pitch;
             sfx.PlayOneShot(clip);
         }
 
         public void ApplyMusicSetting()
         {
+            if (music.clip == null) return;
             if (SaveSystem.MusicOn) { if (!music.isPlaying) music.Play(); }
             else music.Stop();
         }
@@ -114,6 +115,11 @@ namespace TinyTownRoads
 
         static AudioClip Render(string name, float duration, Func<float, float> sample)
         {
+#if UNITY_LUNA
+            // Luna playables cannot create AudioClips at runtime — ship silent
+            // (ad networks auto-mute playables by default anyway).
+            return null;
+#else
             int count = Mathf.CeilToInt(duration * SampleRate);
             var data = new float[count];
             for (int i = 0; i < count; i++)
@@ -121,6 +127,7 @@ namespace TinyTownRoads
             var clip = AudioClip.Create(name, count, 1, SampleRate, false);
             clip.SetData(data, 0);
             return clip;
+#endif
         }
     }
 }

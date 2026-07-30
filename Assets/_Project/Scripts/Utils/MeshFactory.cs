@@ -28,6 +28,15 @@ namespace TinyTownRoads
             }
         }
 
+        /// <summary>
+        /// Inject the shared material (scene-serialized in GameBootstrap). Luna only
+        /// exports shaders reachable from scene assets, so Shader.Find returns null there.
+        /// </summary>
+        public static void SetMaterial(Material injected)
+        {
+            if (injected != null) material = injected;
+        }
+
         /// <summary>MeshFilter + MeshRenderer child using the shared unlit material.</summary>
         public static MeshRenderer CreatePart(Transform parent, string name, Mesh mesh, Color tint)
         {
@@ -44,9 +53,15 @@ namespace TinyTownRoads
 
         public static void SetTint(Renderer renderer, Color tint)
         {
+#if UNITY_LUNA
+            // MaterialPropertyBlock is unreliable in Luna — tint a per-renderer
+            // material instance instead (fine at playable scale).
+            renderer.material.SetColor(ColorId, Encode(tint));
+#else
             if (mpb == null) mpb = new MaterialPropertyBlock();
             mpb.SetColor(ColorId, Encode(tint));
             renderer.SetPropertyBlock(mpb);
+#endif
         }
 
         /// <summary>Block with vertically rounded corners and a flat top, base-centered.</summary>
@@ -240,10 +255,16 @@ namespace TinyTownRoads
 
             public Mesh Build(string name)
             {
-                var mesh = new Mesh { name = name };
-                mesh.SetVertices(verts);
-                mesh.SetColors(colors);
-                mesh.SetTriangles(tris, 0);
+                var mesh = new Mesh();
+#if !UNITY_LUNA
+                // Luna's bridged Object.name is getter-only; the name is cosmetic anyway.
+                mesh.name = name;
+#endif
+                // Array-property assignment: Luna's bridge doesn't implement the
+                // List<> Set* overloads (colors silently drop → everything white).
+                mesh.vertices = verts.ToArray();
+                mesh.colors = colors.ToArray();
+                mesh.triangles = tris.ToArray();
                 mesh.RecalculateBounds();
                 return mesh;
             }

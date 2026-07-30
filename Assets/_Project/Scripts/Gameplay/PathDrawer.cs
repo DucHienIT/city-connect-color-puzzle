@@ -62,6 +62,9 @@ namespace TinyTownRoads
             StepTowards(target);
         }
 
+        // Luna's bridged System.Math lacks the int overload of Math.Sign.
+        static int Sign(int v) => v > 0 ? 1 : v < 0 ? -1 : 0;
+
         void StepTowards(Vector2Int target)
         {
             var branch = paths.GetBranch(activeColor, activeHouse);
@@ -72,11 +75,11 @@ namespace TinyTownRoads
 
                 var delta = target - head;
                 var primary = Mathf.Abs(delta.x) >= Mathf.Abs(delta.y)
-                    ? new Vector2Int(Math.Sign(delta.x), 0)
-                    : new Vector2Int(0, Math.Sign(delta.y));
+                    ? new Vector2Int(Sign(delta.x), 0)
+                    : new Vector2Int(0, Sign(delta.y));
                 var secondary = primary.x != 0
-                    ? new Vector2Int(0, Math.Sign(delta.y))
-                    : new Vector2Int(Math.Sign(delta.x), 0);
+                    ? new Vector2Int(0, Sign(delta.y))
+                    : new Vector2Int(Sign(delta.x), 0);
 
                 if (paths.Extend(activeColor, activeHouse, head + primary))
                 {

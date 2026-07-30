@@ -88,6 +88,7 @@ namespace TinyTownRoads
             SaveSystem.SetLastLevelIndex(index);
             ui.ShowGameplay();
             RefreshHud();
+            PlayableAds.NotifyStarted();
         }
 
         void FitCamera()
@@ -144,6 +145,7 @@ namespace TinyTownRoads
             int stars = WinChecker.CalcStars(grid, paths);
             SaveSystem.RecordResult(grid.Level.levelId, stars);
             AudioManager.Instance?.PlayWin();
+            PlayableAds.NotifyEnded();
 
             bool hasNext = levelIndex + 1 < levels.Count;
             int shownCoverage = WinChecker.CoveragePercent(grid, paths);
