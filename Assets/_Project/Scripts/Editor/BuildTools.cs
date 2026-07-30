@@ -17,9 +17,7 @@ namespace TinyTownRoads.EditorTools
     /// </summary>
     public static class BuildTools
     {
-        // TikTok Mini Games requires the build output folder to be named "tt-minigame"
-        // (the folder ttmg login/init/dev/upload operate on — see docs/huong-dan-build-unity-tiktok.md).
-        const string OutputDir = "Builds/tt-minigame";
+        const string OutputDir = "Builds/WebGL";
 
 #if UNITY_6000_3_OR_NEWER
         [MainToolbarElement("TinyTownRoads/BuildWebGL", defaultDockPosition = MainToolbarDockPosition.Right)]
